@@ -8,7 +8,7 @@ import tempfile
 import os
 
 HF_TOKEN = "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"
-MODEL_ID = "Qwen/Qwen2.5-14B-Instruct"
+MODEL_ID = "openchat/openchat-3.5-1210"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 
 menu = [
