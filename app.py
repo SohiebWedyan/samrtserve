@@ -7,9 +7,9 @@ from io import BytesIO
 import tempfile
 import os
 
-HF_TOKEN = "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"
+
 MODEL_ID = "HuggingFaceH4/zephyr-7b-beta"
-client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
+client = InferenceClient(model=MODEL_ID)
 
 menu = [
     {"name": "كبسة دجاج", "type": "لحوم", "desc": "أرز مع بهارات ودجاج"},
