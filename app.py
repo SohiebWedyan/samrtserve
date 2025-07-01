@@ -7,8 +7,8 @@ from io import BytesIO
 import tempfile
 import os
 
-HF_TOKEN = "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"
-MODEL_ID = "openchat/openchat-3.5-1210"
+HF_TOKEN = "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"
+MODEL_ID = "HuggingFaceH4/zephyr-7b-beta"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 
 menu = [
