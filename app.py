@@ -11,7 +11,8 @@ HF_TOKEN = os.environ.get("HF_TOKEN")
 MODEL_ID = "NousResearch/Hermes-3-Llama-3.1-8B"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 
-LOGO_URL = "https://github.com/SohiebWedyan/samrtserve/edit/main/smartserve-logo-v2.png"
+LOGO_URL = "https://raw.githubusercontent.com/sohiebwedyan/smartserve_logo/main/smartserve-logo-v2.png"
+BG_URL = "https://wallpapers.com/images/featured/restaurant-background-2ez77umko2vj5w02.jpg"
 
 menu = [
     {"name": "كبسة دجاج", "type": "لحوم", "desc": "أرز مع بهارات ودجاج"},
@@ -36,72 +37,45 @@ menu = [
     {"name": "نسكافيه", "type": "مشروبات ساخنة", "desc": "قهوة سريعة الذوبان"},
 ]
 
-# ==== CSS للتصميم الحديث مع وضوح تام للنصوص ====
+# ========== إعداد CSS للخلفية والشفافية ==========
 st.set_page_config(layout="centered", page_title="مساعد SmartServe AI الذكي")
-
-st.markdown("""
+st.markdown(f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&family=Tajawal:wght@400;700&display=swap');
-    body, .stApp {
-        background: url('https://wallpapers.com/images/featured/restaurant-background-2ez77umko2vj5w02.jpg') no-repeat center center fixed !important;
+    body, .stApp {{
+        background: url('{BG_URL}') no-repeat center center fixed !important;
         background-size: cover !important;
-        font-family: 'Cairo', 'Tajawal', sans-serif !important;
-    }
-    .main {background: rgba(0, 0, 0, 0.5) !important; border-radius: 20px;}
-    .bubble-user {
-        background: rgba(30,30,36,0.79);
-        border-radius: 18px 0 18px 18px;
-        margin-bottom: 8px; padding: 15px 21px 11px 15px; font-size:19px; text-align:right;
-        color:#fff;direction:rtl; max-width:80%; margin-left:auto; margin-right:2vw;
-        box-shadow: 0 4px 12px #000a;
-        border:1.5px solid #fff2;
-        text-shadow: 0 2px 7px #000b;
-    }
-    .bubble-bot  {
-        background: rgba(255,245,180,0.78);
-        border-radius: 0 18px 18px 18px;
-        margin-bottom: 12px; padding: 15px 21px 13px 15px; font-size:19px;
-        font-weight:600;text-align:right;color:#382a00;direction:rtl; max-width:80%; margin-right:auto; margin-left:2vw;
-        box-shadow: 0 2px 10px #0008;
-        border:1.3px solid #ffe27a;
-        text-shadow: 0 2px 8px #fff8, 0 1px 3px #ffe59e;
-    }
-    .stTextInput input {
-        font-size:19px; text-align:right; border-radius:11px;
-        background:rgba(28,28,34,0.93)!important; color:#ffe !important;
-        border: 2px solid #ffd95ba1;
-        box-shadow: 0 2px 8px #000a;
-    }
-    .stTextInput input::placeholder {color:#fff6;}
-    .stButton>button {
-        background: linear-gradient(90deg,#ffd95b 60%, #ffeeba 100%);
-        color: #28220d; font-size:20px; font-weight:bold; border-radius:12px; padding:8px 0;
-        border: 1.8px solid #ffd95b; box-shadow:0 2px 8px #23201290;
-    }
-    .stButton>button:hover { background: #fff7dc !important; color: #a87e00;}
-    .example-hint {
-        font-size:17px;color:#fff; background:rgba(40,32,0,0.33);border-radius:11px; padding:7px 17px; margin-bottom:18px;text-align:right;box-shadow:0 2px 8px #0003;
-        text-shadow:0 2px 8px #0009;
-    }
-    .app-header {
-        color: #ffe186;
-        text-shadow: 0 2px 15px #000c, 0 2px 4px #6a4a015c;
-        font-size: 36px;
-        font-weight: 900;
+    }}
+    .main {{
+        background: rgba(24, 25, 28, 0.76) !important;
+        border-radius: 18px;
+        padding: 0px 0px;
+    }}
+    .msg-user {{
+        background: #e7f1ffcc;
+        border-radius: 14px;
+        padding: 12px 17px;
         margin-bottom: 4px;
-        margin-top: 7px;
-    }
-    .app-subheader {
-        font-size:20px;color:#fffbe9;margin-bottom:15px;
-        text-shadow:0 1px 7px #000c;
-    }
-    @media only screen and (max-width: 700px) {
-        .bubble-user, .bubble-bot {font-size:15px; padding: 9px 4px;}
-        .main {border-radius:0;}
-        .app-header {font-size:27px;}
-        .app-subheader {font-size:15px;}
-        .example-hint {font-size:13px;}
-    }
+        font-size: 17px;
+        text-align: right;
+        color: #232323;
+        direction: rtl;
+    }}
+    .msg-bot  {{
+        background: #fff9e3cc;
+        border-radius: 14px;
+        padding: 13px 17px;
+        margin-bottom: 9px;
+        font-weight: 600;
+        font-size: 17px;
+        text-align: right;
+        color: #363616;
+        direction: rtl;
+    }}
+    .stTextInput input {{ font-size:17px; text-align:right; }}
+    .stButton>button {{font-size:17px;border-radius:8px;margin-top:1px;}}
+    @media only screen and (max-width: 600px) {{
+        .msg-user, .msg-bot {{font-size:15px; padding: 11px 8px;}}
+    }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -109,24 +83,25 @@ st.markdown("""
 st.markdown(f"""
     <div style='text-align:center;margin-bottom:1px;'>
         <img src="{LOGO_URL}" style="width:80px; margin-bottom:-16px;" />
-        <div class='app-header'>SmartServe</div>
-        <div class='app-subheader'>مساعد ذكي لطلبات الطعام والمشروبات</div>
+        <div style='font-size:32px;font-weight:900;color:#ffe186;text-shadow:0 2px 15px #000c;'>SmartServe</div>
+        <div style='font-size:19px;color:#fffbe9;margin-bottom:10px;'>مساعد ذكي لطلبات الطعام والمشروبات</div>
     </div>
 """, unsafe_allow_html=True)
 
-# ---- مثال أسفل العنوان ----
 st.markdown(
     """
-    <div class='example-hint'>
+    <div style='font-size:15px;color:#ffe186;margin-bottom:10px;text-align:right'>
         👇 <b>مثال:</b> <b>وجبة غداء نباتية</b> أو <b>ما هي مكونات المنسف؟</b>
     </div>
     """,
     unsafe_allow_html=True
 )
 
-# ==== سجل المحادثة ====
+# ==== سجل المحادثة والسلة ====
 if "history" not in st.session_state:
     st.session_state.history = []
+if "cart" not in st.session_state:
+    st.session_state.cart = []
 
 def search_menu(user_input):
     user_input = user_input.strip().lower()
@@ -174,11 +149,18 @@ final_input = voice_text if voice_text else user_input
 if final_input and st.button("إرسال", use_container_width=True):
     menu_results = search_menu(final_input)
     if menu_results:
-        msg = "إليك بعض الخيارات من المنيو لدينا:\n"
-        for item in menu_results:
-            msg += f"- **{item['name']}**: {item['desc']}\n"
+        msg = "اختر ما تريد إضافته للسلة 👇:<br>"
+        for i, item in enumerate(menu_results):
+            add_key = f"add_{i}_{item['name']}"
+            qty_key = f"qty_{i}_{item['name']}"
+            note_key = f"note_{i}_{item['name']}"
+            with st.expander(f"➕ أضف {item['name']}", expanded=False):
+                qty = st.number_input(f"الكمية ({item['name']})", 1, 20, 1, key=qty_key)
+                note = st.text_input(f"ملاحظات ({item['name']})", key=note_key, placeholder="مثلاً: بدون ملح أو زيادة خبز...")
+                if st.button(f"إضافة {item['name']} للسلة", key=add_key):
+                    st.session_state.cart.append({"name": item['name'], "desc": item['desc'], "qty": qty, "note": note})
+                    st.success(f"تمت إضافة {item['name']} للسلة!")
         st.session_state.history.append(("الزبون", final_input))
-        st.session_state.history.append(("SmartServe", msg))
     else:
         msgs = [{"role": "system", "content": "أنت مساعد مطاعم ذكي ترد بالعربية الفصحى وتوضح اقتراحات الطعام أو أي معلومات غذائية أو نصائح حول المنيو."}]
         for s, m in st.session_state.history[-6:]:
@@ -192,9 +174,29 @@ if final_input and st.button("إرسال", use_container_width=True):
 # ---- عرض المحادثة ----
 for sender, text in st.session_state.history[-8:]:
     if sender == "الزبون":
-        st.markdown(f"<div class='bubble-user'><b>👤 الزبون:</b><br>{text}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='msg-user'><b>👤 الزبون:</b><br>{text}</div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div class='bubble-bot'><b>🤖 SmartServe:</b><br>{text}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='msg-bot'><b>🤖 SmartServe:</b><br>{text}</div>", unsafe_allow_html=True)
+
+# ---- سلة الطلبات في الشريط الجانبي ----
+with st.sidebar:
+    st.markdown("<div style='text-align:right;font-size:24px;color:#ffe186;'>🛒 سلة الطلبات</div>", unsafe_allow_html=True)
+    if st.session_state.cart:
+        for idx, item in enumerate(st.session_state.cart):
+            st.markdown(
+                f"""<div style='background:#222c;padding:7px 9px;border-radius:7px;margin-bottom:6px;'>
+                <b>{item['name']}</b> | <span style='color:#ffe186'>الكمية:</span> {item['qty']}
+                <br><span style='color:#fff7a4'>{item['desc']}</span>
+                <br><span style='font-size:15px;color:#ffe;'>{'ملاحظات: '+item['note'] if item['note'] else ''}</span>
+                </div>""", unsafe_allow_html=True)
+            if st.button("❌ حذف", key=f"del_{idx}_{item['name']}"):
+                st.session_state.cart.pop(idx)
+                st.experimental_rerun()
+        if st.button("✅ إرسال الطلب", key="order_btn"):
+            st.success("تم إرسال الطلب بنجاح! 🍽️ شكراً لاستخدامك SmartServe.")
+            st.session_state.cart.clear()
+    else:
+        st.info("السلة فارغة. أضف أصنافك المفضلة من المنيو.")
 
 # ---- إخراج صوتي ----
 if st.session_state.history and st.session_state.history[-1][0] == "SmartServe":
