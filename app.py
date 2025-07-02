@@ -10,6 +10,7 @@ import os
 # إعدادات الـ API
 import os
 HF_TOKEN = os.environ.get("HF_TOKEN")
+model = "HuggingFaceH4/zephyr-7b-beta"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 # لوجو SmartServe (يمكنك تغييره برابط آخر)
 LOGO_URL = "https://raw.githubusercontent.com/sohiebwedyan/smartserve_logo/main/smartserve-logo-v2.png"
