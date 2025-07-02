@@ -127,7 +127,7 @@ if audio:
             st.toast("❌ لم يتم التعرف على الصوت")
     os.remove(temp_audio_file_path)
 
-# زر الإرسال يدعم الإدخال الموحد (صوتي أو كتابي) ويمسح مربع الكتابة فقط
+# زر الإرسال يدعم الإدخال الموحد (صوتي أو كتابي)
 if st.button("إرسال", use_container_width=True):
     if voice_text.strip():
         final_input = voice_text
@@ -193,13 +193,33 @@ with st.sidebar:
             st.success("تم إرسال الطلب بنجاح!")
             st.session_state.cart.clear()
 
-# عرض المحادثة
+# --- عرض المحادثة ---
 for sender, text in st.session_state.history[-8:]:
     class_name = 'msg-user' if sender == "الزبون" else 'msg-bot'
     icon = "👤" if sender == "الزبون" else "🤖"
     st.markdown(f"<div class='{class_name}'><b>{icon} {sender}:</b><br>{text}</div>", unsafe_allow_html=True)
 
-# إخراج صوتي للرد الأخير
+# --- عرض السلة أيضاً أسفل الصفحة (للجوال/كل الشاشات) ---
+if st.session_state.cart:
+    st.markdown("<hr>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size:20px;color:#ffe48c;font-weight:700;text-align:right;'>🛒 سلة الطلبات الحالية</div>", unsafe_allow_html=True)
+    for i, x in enumerate(st.session_state.cart):
+        cols = st.columns([10,1])
+        with cols[0]:
+            st.markdown(
+                f"<div class='cart-box'><b>{x['name']}</b> × <b>{x['qty']}</b>"
+                f"{('<br><span style=\"font-size:13px;color:#ffe48c\">ملاحظات: '+x['notes']+'</span>') if x['notes'] else ''}"
+                f"</div>", unsafe_allow_html=True
+            )
+        with cols[1]:
+            if st.button("❌", key=f"del_bottom_{i}"):
+                st.session_state.cart.pop(i)
+                st.experimental_rerun()
+    if st.button("✅ تأكيد الطلب (من هنا)"):
+        st.success("تم إرسال الطلب بنجاح!")
+        st.session_state.cart.clear()
+
+# --- إخراج صوتي للرد الأخير ---
 if st.session_state.history and st.session_state.history[-1][0] == "SmartServe":
     last_response = st.session_state.history[-1][1]
     tts = gTTS(last_response, lang="ar")
