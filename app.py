@@ -13,7 +13,7 @@ MODEL_ID = "NousResearch/Hermes-3-Llama-3.1-8B"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 
 # لوجو (من GitHub)
-LOGO_URL = "https://github.com/SohiebWedyan/samrtserve/blob/main/Screenshot%202025-07-02%20142729.png"
+LOGO_URL = "https://github.com/SohiebWedyan/samrtserve/blob/main/smartserve-logo-v2.png"
 
 # قائمة الطعام
 menu = [
