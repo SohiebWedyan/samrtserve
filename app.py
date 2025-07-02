@@ -7,15 +7,13 @@ from io import BytesIO
 import tempfile
 import os
 
-# --- إعدادات النموذج وواجهة الذكاء الاصطناعي ---
+# إعدادات النموذج
 HF_TOKEN = os.environ.get("HF_TOKEN")
 MODEL_ID = "NousResearch/Hermes-3-Llama-3.1-8B"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 
-# --- لوجو احترافي (رابط خارجي شغال دائماً) ---
 LOGO_URL = "https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
 
-# --- قائمة المنيو ---
 menu = [
     {"name": "كبسة دجاج", "type": "لحوم", "desc": "أرز مع بهارات ودجاج"},
     {"name": "منسف أردني", "type": "لحوم", "desc": "لحم مع لبن وجوز هند"},
@@ -39,42 +37,77 @@ menu = [
     {"name": "نسكافيه", "type": "مشروبات ساخنة", "desc": "قهوة سريعة الذوبان"},
 ]
 
-# --- CSS وتنسيق ---
-st.set_page_config(layout="centered", page_title="مساعد SmartServe الذكي")
+st.set_page_config(layout="centered", page_title="SmartServe - مساعد الطلبات الذكي")
+
 st.markdown("""
     <style>
-    body, .stApp { background-color: #18191c !important; }
-    .main { background-color: #18191c !important; }
-    .msg-user {background:#e7f1ff;border-radius:14px;padding:12px 17px;margin-bottom:4px;font-size:17px;text-align:right;color:#232323;direction:rtl}
-    .msg-bot  {background:#fff9e3;border-radius:14px;padding:13px 17px;margin-bottom:9px;font-weight:600;font-size:17px;text-align:right;color:#363616;direction:rtl}
-    .stTextInput input { font-size:17px; text-align:right; }
-    .stButton>button {font-size:17px;border-radius:8px;margin-top:1px;}
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&family=Tajawal:wght@400;700&display=swap');
+    body, .stApp {
+        background: url('https://wallpapers.com/images/featured/restaurant-background-2ez77umko2vj5w02.jpg') no-repeat center center fixed !important;
+        background-size: cover !important;
+        font-family: 'Cairo', 'Tajawal', sans-serif !important;
+    }
+    .main {background: rgba(30, 29, 29, 0.84) !important;}
+    .bubble-user {
+        background: linear-gradient(90deg, #e3eaffb9 70%, #fff9e3a1 100%);
+        border-radius: 16px 0 16px 16px;
+        box-shadow: 0 2px 10px #0002;
+        margin-bottom: 6px; padding: 14px 17px 9px 14px; font-size:18px; text-align:right;
+        color:#232323;direction:rtl; max-width:77%; margin-left:auto; margin-right:3px;
+    }
+    .bubble-bot  {
+        background: linear-gradient(270deg, #fff9e3e7 70%, #e3eaff95 100%);
+        border-radius: 0 16px 16px 16px;
+        box-shadow: 0 2px 13px #0002;
+        margin-bottom: 10px; padding: 14px 17px 12px 14px; font-size:18px;
+        font-weight:600;text-align:right;color:#2d2210;direction:rtl; max-width:77%; margin-right:auto; margin-left:3px;
+    }
+    .stTextInput input { font-size:19px; text-align:right; border-radius:8px;}
+    .stButton>button {
+        background: linear-gradient(90deg,#ffd95b 50%, #fae18c 100%);
+        color: #232323; font-size:19px; font-weight:bold; border-radius:10px; padding:7px 0;
+        border: 1.3px solid #e7cf7b; box-shadow:0 2px 7px #c9ad5b40;
+    }
+    .stButton>button:hover { background: #ffebaf !important; color: #a87e00;}
+    .icon-mic {
+        font-size: 30px !important;
+        margin-left: -6px;
+        color: #F9E27B;
+        filter: drop-shadow(1px 1px 3px #4447);
+        cursor:pointer;
+    }
+    /* Mobile */
     @media only screen and (max-width: 600px) {
-        .msg-user, .msg-bot {font-size:15px; padding: 11px 8px;}
+        .bubble-user, .bubble-bot {font-size:15px; padding: 10px 6px;}
+        .main {border-radius:0;}
     }
     </style>
 """, unsafe_allow_html=True)
 
-# --- لوجو + مقدمة ---
+# --- Header ---
 st.markdown(f"""
     <div style='text-align:center;margin-bottom:1px;'>
-        <img src="{LOGO_URL}" style="width:85px; margin-bottom:-18px;" />
-        <div style='font-size:30px; font-weight:bold; color:#F9E27B; margin-bottom:4px; margin-top:10px;'>SmartServe</div>
-        <div style='font-size:17px;color:#F7F6F4;margin-bottom:8px;'>مساعد ذكي لطلبات الطعام والمشروبات</div>
+        <img src="{LOGO_URL}" style="width:73px; margin-bottom:-14px;" />
+        <div style='font-size:29px; font-weight:900; color:#F9E27B; letter-spacing:1px; margin-bottom:4px; margin-top:10px;'>SmartServe</div>
+        <div style='font-size:17px;color:#faf4ce;margin-bottom:12px;'>مساعد ذكي لطلبات الطعام والمشروبات</div>
     </div>
 """, unsafe_allow_html=True)
 
-# --- مثال جاهز تحت الإدخال ---
-st.markdown(
-    """
-    <div style='font-size:15px;color:#F9E27B;margin-bottom:10px;text-align:right'>
-        👇 <b>مثال:</b> <b>وجبة غداء نباتية</b> أو <b>ما هي مكونات المنسف؟</b>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+# --- Animated Example ---
+st.markdown("""
+<div style='font-size:15px; color:#F9E27B; margin-bottom:13px;text-align:right;animation:fadein 1.5s;'>
+    <span style='animation:bounce 1s infinite alternate;display:inline-block;'>👇</span>
+    <b>مثال:</b>
+    <span style="background:#fff9e3aa;padding:2px 8px;border-radius:7px;">وجبة غداء نباتية</span>
+    أو
+    <span style="background:#e3eaffad;padding:2px 8px;border-radius:7px;">ما هي مكونات المنسف؟</span>
+</div>
+<style>
+@keyframes bounce { 0%{transform:translateY(0);} 100%{transform:translateY(6px);} }
+@keyframes fadein { from{opacity:0;} to{opacity:1;} }
+</style>
+""", unsafe_allow_html=True)
 
-# --- سجل المحادثة ---
 if "history" not in st.session_state:
     st.session_state.history = []
 
@@ -120,7 +153,6 @@ if audio:
 
 final_input = voice_text if voice_text else user_input
 
-# --- زر إرسال ومعالجة ---
 if final_input and st.button("إرسال", use_container_width=True):
     menu_results = search_menu(final_input)
     if menu_results:
@@ -139,12 +171,12 @@ if final_input and st.button("إرسال", use_container_width=True):
         st.session_state.history.append(("الزبون", final_input))
         st.session_state.history.append(("SmartServe", answer))
 
-# --- عرض المحادثة بشكل أنيق ---
+# --- عرض المحادثة بشكل فقاعات ---
 for sender, text in st.session_state.history[-8:]:
     if sender == "الزبون":
-        st.markdown(f"<div class='msg-user'><b>👤 الزبون:</b><br>{text}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='bubble-user'><b>👤 الزبون:</b><br>{text}</div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div class='msg-bot'><b>🤖 SmartServe:</b><br>{text}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='bubble-bot'><b>🤖 SmartServe:</b><br>{text}</div>", unsafe_allow_html=True)
 
 # --- إخراج صوتي ---
 if st.session_state.history and st.session_state.history[-1][0] == "SmartServe":
@@ -154,3 +186,11 @@ if st.session_state.history and st.session_state.history[-1][0] == "SmartServe":
     tts.write_to_fp(fp)
     fp.seek(0)
     st.audio(fp.read(), format="audio/mp3")
+
+# --- Footer بسيط ---
+st.markdown("""
+<div style='text-align:center; color:#ffe187; font-size:13px; margin-top:30px;'>
+    تصميم <a href="https://github.com/sohiebwedyan" style="color:#fff9e3;text-decoration:underline;font-weight:700;" target="_blank">Sohieb Wedyan</a>
+    | Powered by Hermes-Llama3 | <a href='https://github.com/sohiebwedyan' style="color:#bdbdbd;" target="_blank">GitHub</a>
+</div>
+""", unsafe_allow_html=True)
