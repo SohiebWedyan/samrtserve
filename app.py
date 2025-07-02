@@ -9,7 +9,7 @@ import os
 
 
 HF_TOKEN = os.environ.get("HF_TOKEN")
-model = "NousResearch/Hermes-3-Llama-3.1-8B"
+MODEL_ID = "NousResearch/Hermes-3-Llama-3.1-8B"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 # لوجو SmartServe (يمكنك تغييره برابط آخر)
 LOGO_URL = "https://raw.githubusercontent.com/sohiebwedyan/smartserve_logo/main/smartserve-logo-v2.png"
