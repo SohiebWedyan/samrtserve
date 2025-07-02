@@ -7,13 +7,15 @@ from io import BytesIO
 import tempfile
 import os
 
-
+# --- إعدادات النموذج وواجهة الذكاء الاصطناعي ---
 HF_TOKEN = os.environ.get("HF_TOKEN")
-MODEL_ID = "NousResearch/Hermes-3-Llama-3.1-8B"
+MODEL_ID = "HuggingFaceH4/zephyr-7b-beta"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
-# لوجو SmartServe (يمكنك تغييره برابط آخر)
-LOGO_URL = "https://raw.githubusercontent.com/sohiebwedyan/smartserve_logo/main/smartserve-logo-v2.png"
 
+# --- لوجو احترافي (رابط خارجي شغال دائماً) ---
+LOGO_URL = "https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
+
+# --- قائمة المنيو ---
 menu = [
     {"name": "كبسة دجاج", "type": "لحوم", "desc": "أرز مع بهارات ودجاج"},
     {"name": "منسف أردني", "type": "لحوم", "desc": "لحم مع لبن وجوز هند"},
@@ -37,7 +39,7 @@ menu = [
     {"name": "نسكافيه", "type": "مشروبات ساخنة", "desc": "قهوة سريعة الذوبان"},
 ]
 
-# ========== إعدادات الصفحة وتنسيقات CSS ==========
+# --- CSS وتنسيق ---
 st.set_page_config(layout="centered", page_title="مساعد SmartServe الذكي")
 st.markdown("""
     <style>
@@ -53,25 +55,26 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# لوجو ومقدمة أعلى الصفحة
+# --- لوجو + مقدمة ---
 st.markdown(f"""
     <div style='text-align:center;margin-bottom:1px;'>
-        <img src="{LOGO_URL}" style="width:85px; margin-bottom:-18px" />
+        <img src="{LOGO_URL}" style="width:85px; margin-bottom:-18px;" />
         <div style='font-size:30px; font-weight:bold; color:#F9E27B; margin-bottom:4px; margin-top:10px;'>SmartServe</div>
         <div style='font-size:17px;color:#F7F6F4;margin-bottom:8px;'>مساعد ذكي لطلبات الطعام والمشروبات</div>
     </div>
 """, unsafe_allow_html=True)
 
-# مثال تحت الإدخال
+# --- مثال جاهز تحت الإدخال ---
 st.markdown(
     """
     <div style='font-size:15px;color:#F9E27B;margin-bottom:10px;text-align:right'>
-        👇 مثال: <b>وجبة غداء نباتية</b> أو <b>ما هي مكونات المنسف؟</b>
+        👇 <b>مثال:</b> <b>وجبة غداء نباتية</b> أو <b>ما هي مكونات المنسف؟</b>
     </div>
     """,
     unsafe_allow_html=True
 )
 
+# --- سجل المحادثة ---
 if "history" not in st.session_state:
     st.session_state.history = []
 
@@ -84,7 +87,6 @@ def search_menu(user_input):
     return matches
 
 def ask_ai(messages):
-    # محادثة مع نموذج الدردشة
     response = client.chat.completions.create(
         model=MODEL_ID,
         messages=messages,
@@ -94,7 +96,7 @@ def ask_ai(messages):
     )
     return response.choices[0].message.content.strip()
 
-# =========== إدخال نص وصوت (في صف واحد) ============
+# --- إدخال نص وصوت (بنفس السطر) ---
 col1, col2 = st.columns([8,1], gap="small")
 with col1:
     user_input = st.text_input("", placeholder="اكتب هنا أو استخدم المايك...", key="input", label_visibility="collapsed")
@@ -118,7 +120,7 @@ if audio:
 
 final_input = voice_text if voice_text else user_input
 
-# =========== زر إرسال ومعالجة ============
+# --- زر إرسال ومعالجة ---
 if final_input and st.button("إرسال", use_container_width=True):
     menu_results = search_menu(final_input)
     if menu_results:
@@ -128,7 +130,6 @@ if final_input and st.button("إرسال", use_container_width=True):
         st.session_state.history.append(("الزبون", final_input))
         st.session_state.history.append(("SmartServe", msg))
     else:
-        # استخدم الذكاء الاصطناعي
         msgs = [{"role": "system", "content": "أنت مساعد مطاعم ذكي ترد بالعربية الفصحى وتوضح اقتراحات الطعام أو أي معلومات غذائية أو نصائح حول المنيو."}]
         for s, m in st.session_state.history[-6:]:
             msgs.append({"role": "user" if s == "الزبون" else "assistant", "content": m})
@@ -138,14 +139,14 @@ if final_input and st.button("إرسال", use_container_width=True):
         st.session_state.history.append(("الزبون", final_input))
         st.session_state.history.append(("SmartServe", answer))
 
-# =========== عرض رسائل المحادثة ============
+# --- عرض المحادثة بشكل أنيق ---
 for sender, text in st.session_state.history[-8:]:
     if sender == "الزبون":
         st.markdown(f"<div class='msg-user'><b>👤 الزبون:</b><br>{text}</div>", unsafe_allow_html=True)
     else:
         st.markdown(f"<div class='msg-bot'><b>🤖 SmartServe:</b><br>{text}</div>", unsafe_allow_html=True)
 
-# =========== إخراج صوتي ============
+# --- إخراج صوتي ---
 if st.session_state.history and st.session_state.history[-1][0] == "SmartServe":
     last_response = st.session_state.history[-1][1]
     tts = gTTS(last_response, lang="ar")
