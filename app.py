@@ -152,8 +152,11 @@ if final_input and st.button("إرسال", use_container_width=True):
             ).choices[0].message.content.strip()
         st.session_state.history.append(("الزبون", final_input))
         st.session_state.history.append(("SmartServe", answer))
-    # مسح الرسالة من مربع الإدخال
-    st.session_state["input"] = ""
+    # مسح الإدخال مع إعادة تشغيل الصفحة لإخفاء الرسالة من مربع الإدخال فورًا
+    if "input" in st.session_state:
+        st.session_state["input"] = ""
+    st.experimental_rerun()
+
 
 # نموذج السلة
 st.markdown("<hr style='margin:10px 0;'>", unsafe_allow_html=True)
