@@ -6,6 +6,8 @@ from gtts import gTTS
 from io import BytesIO
 import tempfile
 import os
+import json
+from datetime import datetime
 
 # إعدادات النموذج
 HF_TOKEN = os.environ.get("HF_TOKEN")
@@ -35,6 +37,28 @@ menu = [
     {"name": "كابتشينو", "type": "مشروبات ساخنة", "desc": "إسبريسو مع حليب رغوي"},
     {"name": "نسكافيه", "type": "مشروبات ساخنة", "desc": "قهوة سريعة الذوبان"},
 ]
+
+# --- دالة حفظ الطلب في ملف مشترك ---
+ORDERS_FILE = "orders.json"
+
+def add_order_to_file(cart_items, table_number):
+    order = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "table_number": table_number,
+        "items": cart_items
+    }
+    # تحميل الطلبات الحالية
+    if os.path.exists(ORDERS_FILE):
+        with open(ORDERS_FILE, "r", encoding="utf-8") as f:
+            try:
+                orders = json.load(f)
+            except:
+                orders = []
+    else:
+        orders = []
+    orders.append(order)
+    with open(ORDERS_FILE, "w", encoding="utf-8") as f:
+        json.dump(orders, f, ensure_ascii=False, indent=2)
 
 # إعدادات الواجهة
 st.set_page_config(layout="centered", page_title="SmartServe AI")
@@ -103,6 +127,14 @@ if "history" not in st.session_state:
     st.session_state.history = []
 if "cart" not in st.session_state:
     st.session_state.cart = []
+if "table_number" not in st.session_state:
+    st.session_state.table_number = ""
+
+# --- حقل رقم الطاولة ---
+st.markdown("**رقم الطاولة**", unsafe_allow_html=True)
+table_number = st.text_input("أدخل رقم الطاولة", key="table_input", value=st.session_state.table_number)
+if table_number != st.session_state.table_number:
+    st.session_state.table_number = table_number
 
 # إدخال المستخدم (نص + صوت)
 col1, col2 = st.columns([8,1])
@@ -190,8 +222,14 @@ with st.sidebar:
                 st.session_state.cart.pop(i)
                 st.experimental_rerun()
         if st.button("✅ تأكيد الطلب"):
-            st.success("تم إرسال الطلب بنجاح!")
-            st.session_state.cart.clear()
+            if not st.session_state.cart:
+                st.warning("السلة فارغة!")
+            elif not st.session_state.table_number.strip():
+                st.warning("يرجى إدخال رقم الطاولة.")
+            else:
+                add_order_to_file(st.session_state.cart, st.session_state.table_number.strip())
+                st.success("تم إرسال الطلب بنجاح!")
+                st.session_state.cart.clear()
 
 # --- عرض المحادثة ---
 for sender, text in st.session_state.history[-8:]:
@@ -216,8 +254,14 @@ if st.session_state.cart:
                 st.session_state.cart.pop(i)
                 st.experimental_rerun()
     if st.button("✅ تأكيد الطلب (من هنا)"):
-        st.success("تم إرسال الطلب بنجاح!")
-        st.session_state.cart.clear()
+        if not st.session_state.cart:
+            st.warning("السلة فارغة!")
+        elif not st.session_state.table_number.strip():
+            st.warning("يرجى إدخال رقم الطاولة.")
+        else:
+            add_order_to_file(st.session_state.cart, st.session_state.table_number.strip())
+            st.success("تم إرسال الطلب بنجاح!")
+            st.session_state.cart.clear()
 
 # --- إخراج صوتي للرد الأخير ---
 if st.session_state.history and st.session_state.history[-1][0] == "SmartServe":
