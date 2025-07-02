@@ -7,15 +7,12 @@ from io import BytesIO
 import tempfile
 import os
 
-# إعدادات نموذج الذكاء الاصطناعي
 HF_TOKEN = os.environ.get("HF_TOKEN")
 MODEL_ID = "NousResearch/Hermes-3-Llama-3.1-8B"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 
-# لوجو (من GitHub)
-LOGO_URL = "https://github.com/SohiebWedyan/samrtserve/blob/main/smartserve-logo-v2.png"
+LOGO_URL = "https://raw.githubusercontent.com/sohiebwedyan/smartserve_logo/main/smartserve-logo-v2.png"
 
-# قائمة الطعام
 menu = [
     {"name": "كبسة دجاج", "type": "لحوم", "desc": "أرز مع بهارات ودجاج"},
     {"name": "منسف أردني", "type": "لحوم", "desc": "لحم مع لبن وجوز هند"},
@@ -39,7 +36,7 @@ menu = [
     {"name": "نسكافيه", "type": "مشروبات ساخنة", "desc": "قهوة سريعة الذوبان"},
 ]
 
-# ==== CSS للتصميم الحديث والخلفية ====
+# ==== CSS للتصميم الحديث مع وضوح تام للنصوص ====
 st.set_page_config(layout="centered", page_title="مساعد SmartServe AI الذكي")
 
 st.markdown("""
@@ -50,63 +47,60 @@ st.markdown("""
         background-size: cover !important;
         font-family: 'Cairo', 'Tajawal', sans-serif !important;
     }
-    .main {background: rgba(0, 0, 0, 0.55) !important; border-radius: 20px;}
+    .main {background: rgba(0, 0, 0, 0.5) !important; border-radius: 20px;}
     .bubble-user {
-        background: rgba(20,20,28, 0.75);
+        background: rgba(30,30,36,0.79);
         border-radius: 18px 0 18px 18px;
-        box-shadow: 0 2px 12px #0005;
-        margin-bottom: 8px; padding: 14px 20px 9px 13px; font-size:19px; text-align:right;
-        color:#fff;direction:rtl; max-width:78%; margin-left:auto; margin-right:3px;
-        border:1.2px solid #FFF4;
+        margin-bottom: 8px; padding: 15px 21px 11px 15px; font-size:19px; text-align:right;
+        color:#fff;direction:rtl; max-width:80%; margin-left:auto; margin-right:2vw;
+        box-shadow: 0 4px 12px #000a;
+        border:1.5px solid #fff2;
+        text-shadow: 0 2px 7px #000b;
     }
     .bubble-bot  {
-        background: rgba(255,215,60,0.13);
+        background: rgba(255,245,180,0.78);
         border-radius: 0 18px 18px 18px;
-        box-shadow: 0 2px 10px #0006;
-        margin-bottom: 12px; padding: 14px 20px 11px 13px; font-size:19px;
-        font-weight:600;text-align:right;color:#ffe07f;direction:rtl; max-width:78%; margin-right:auto; margin-left:3px;
-        border:1.2px solid #ffe47b52;
-        text-shadow: 0 1px 6px #282100b0;
+        margin-bottom: 12px; padding: 15px 21px 13px 15px; font-size:19px;
+        font-weight:600;text-align:right;color:#382a00;direction:rtl; max-width:80%; margin-right:auto; margin-left:2vw;
+        box-shadow: 0 2px 10px #0008;
+        border:1.3px solid #ffe27a;
+        text-shadow: 0 2px 8px #fff8, 0 1px 3px #ffe59e;
     }
     .stTextInput input {
-        font-size:19px; text-align:right; border-radius:10px;
-        background:rgba(25,25,25,0.80)!important; color:#fff!important;
-        border: 1.4px solid #ffd95b8f;
+        font-size:19px; text-align:right; border-radius:11px;
+        background:rgba(28,28,34,0.93)!important; color:#ffe !important;
+        border: 2px solid #ffd95ba1;
+        box-shadow: 0 2px 8px #000a;
     }
-    .stTextInput input::placeholder {color:#fff7;}
+    .stTextInput input::placeholder {color:#fff6;}
     .stButton>button {
-        background: linear-gradient(90deg,#ffd95ba6 60%, #fae18c9c 100%);
-        color: #36321c; font-size:20px; font-weight:bold; border-radius:11px; padding:7px 0;
-        border: 1.8px solid #ffc14d; box-shadow:0 2px 11px #1d120480;
+        background: linear-gradient(90deg,#ffd95b 60%, #ffeeba 100%);
+        color: #28220d; font-size:20px; font-weight:bold; border-radius:12px; padding:8px 0;
+        border: 1.8px solid #ffd95b; box-shadow:0 2px 8px #23201290;
     }
-    .stButton>button:hover { background: #ffeebc !important; color: #a87e00;}
-    .icon-mic {
-        font-size: 32px !important;
-        margin-left: -8px;
-        color: #FFD95B;
-        filter: drop-shadow(1px 1px 4px #000c);
-        cursor:pointer;
-    }
+    .stButton>button:hover { background: #fff7dc !important; color: #a87e00;}
     .example-hint {
-        font-size:16.5px;color:#fff; background:rgba(0,0,0,0.42);border-radius:8px; padding:5px 15px; margin-bottom:13px;text-align:right;box-shadow:0 2px 8px #0003;
-        text-shadow:0 2px 8px #0007;
+        font-size:17px;color:#fff; background:rgba(40,32,0,0.33);border-radius:11px; padding:7px 17px; margin-bottom:18px;text-align:right;box-shadow:0 2px 8px #0003;
+        text-shadow:0 2px 8px #0009;
     }
     .app-header {
         color: #ffe186;
         text-shadow: 0 2px 15px #000c, 0 2px 4px #6a4a015c;
-        font-size: 32px;
-        letter-spacing:1px;
+        font-size: 36px;
         font-weight: 900;
         margin-bottom: 4px;
         margin-top: 7px;
     }
     .app-subheader {
-        font-size:18px;color:#fffbe9;margin-bottom:15px;
+        font-size:20px;color:#fffbe9;margin-bottom:15px;
         text-shadow:0 1px 7px #000c;
     }
-    @media only screen and (max-width: 600px) {
-        .bubble-user, .bubble-bot {font-size:15px; padding: 10px 6px;}
+    @media only screen and (max-width: 700px) {
+        .bubble-user, .bubble-bot {font-size:15px; padding: 9px 4px;}
         .main {border-radius:0;}
+        .app-header {font-size:27px;}
+        .app-subheader {font-size:15px;}
+        .example-hint {font-size:13px;}
     }
     </style>
 """, unsafe_allow_html=True)
@@ -114,7 +108,7 @@ st.markdown("""
 # ---- رأس الصفحة واللوجو ----
 st.markdown(f"""
     <div style='text-align:center;margin-bottom:1px;'>
-        <img src="{LOGO_URL}" style="width:92px; margin-bottom:-16px;" />
+        <img src="{LOGO_URL}" style="width:80px; margin-bottom:-16px;" />
         <div class='app-header'>SmartServe</div>
         <div class='app-subheader'>مساعد ذكي لطلبات الطعام والمشروبات</div>
     </div>
