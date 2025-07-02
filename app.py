@@ -5,12 +5,50 @@ import speech_recognition as sr
 from gtts import gTTS
 from io import BytesIO
 import tempfile
+from PIL import Image
+import base64
+
 import os
 
-# إعداد API
-HF_TOKEN = "hf_..."  # ضع التوكن الخاص بك هنا أو استخدم open access إن أردت
+HF_TOKEN = os.environ.get("HF_TOKEN")
 MODEL_ID = "HuggingFaceH4/zephyr-7b-beta"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
+
+# --- إضافة اللوجو ---
+def get_logo_base64():
+    logo_url = "https://raw.githubusercontent.com/sohiebwedyan/smartserve_logo/main/smartserve-logo-v2.png"
+    import requests
+    response = requests.get(logo_url)
+    if response.status_code == 200:
+        return base64.b64encode(response.content).decode()
+    return None
+
+logo_base64 = get_logo_base64()
+if logo_base64:
+    st.markdown(
+        f"""
+        <div style="text-align:center; margin-bottom:-25px;">
+            <img src="data:image/png;base64,{logo_base64}" alt="SmartServe Logo" width="120"/>
+        </div>
+        """, unsafe_allow_html=True
+    )
+
+# --- مثال الطلب والرد ---
+st.markdown(
+    """
+    <div style='background:#f5f8fe;border-radius:10px;padding:12px 16px;margin-bottom:18px;text-align:right;font-size:17px'>
+        <b>مثال:</b><br>
+        <span style='color:#324884'>👤 الزبون:</span> <i>أريد وجبة غداء نباتية</i><br>
+        <span style='color:#84601f'>🤖 SmartServe:</span> <i>إليك بعض الخيارات النباتية: بيتزا مارغريتا، سلطة فتوش، حمص، فلافل...</i>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# --- بقية كودك هنا ---
+# ...
+
+
 
 menu = [
     {"name": "كبسة دجاج", "type": "لحوم", "desc": "أرز مع بهارات ودجاج"},
