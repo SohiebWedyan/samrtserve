@@ -128,8 +128,12 @@ if audio:
 
 final_input = voice_text or user_input
 
-# ذكاء اصطناعي ومعالجة الطلب ومسح الرسالة بعد الإرسال
-if final_input and st.button("إرسال", use_container_width=True):
+# دالة لمسح مربع الإرسال بعد الإرسال
+def clear_input():
+    st.session_state.input = ""
+
+# ذكاء اصطناعي ومعالجة الطلب
+if final_input and st.button("إرسال", use_container_width=True, on_click=clear_input):
     menu_results = [m for m in menu if final_input in m["name"] or final_input in m["desc"] or final_input in m["type"]]
     if menu_results:
         msg = "إليك بعض الخيارات من المنيو لدينا:\n"
@@ -152,11 +156,6 @@ if final_input and st.button("إرسال", use_container_width=True):
             ).choices[0].message.content.strip()
         st.session_state.history.append(("الزبون", final_input))
         st.session_state.history.append(("SmartServe", answer))
-    # مسح الإدخال مع إعادة تشغيل الصفحة لإخفاء الرسالة من مربع الإدخال فورًا
-    if "input" in st.session_state:
-        st.session_state["input"] = ""
-    st.experimental_rerun()
-
 
 # نموذج السلة
 st.markdown("<hr style='margin:10px 0;'>", unsafe_allow_html=True)
