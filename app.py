@@ -129,17 +129,11 @@ if audio:
 
 # زر الإرسال يدعم الإدخال الموحد (صوتي أو كتابي) ويمسح مربع الكتابة فقط
 if st.button("إرسال", use_container_width=True):
-    # إذا هناك نص صوتي تم إدخاله الآن:
     if voice_text.strip():
         final_input = voice_text
-        if "input" in st.session_state:
-            st.session_state.input = ""   # امسح الكتابي فقط إذا استُخدم الصوت
     else:
         final_input = st.session_state.input
-        if "input" in st.session_state:
-            st.session_state.input = ""   # امسح الكتابي بعد الإرسال
 
-    # تابع فقط إذا هناك نص فعلي للإرسال
     if final_input.strip():
         menu_results = [m for m in menu if final_input in m["name"] or final_input in m["desc"] or final_input in m["type"]]
         if menu_results:
