@@ -93,7 +93,7 @@ LOGO_URL = "https://img.pikbest.com/png-images/20241111/-22creative-food-logo-co
 st.markdown(f"""
     <div style='text-align:center;'>
         <img src="{LOGO_URL}" style="width:85px; margin-bottom:-18px;" />
-        <div style='font-size:30px; font-weight:bold; color:#F9E27B;'>SmartServe AI</div>
+        <div style='font-size:30px; font-weight:bold; color:#F9E27B;'>SmartServe</div>
         <div style='font-size:17px;color:#FFFDEB;'>مساعد ذكي لطلبات الطعام والمشروبات</div>
     </div>
 """, unsafe_allow_html=True)
@@ -111,6 +111,7 @@ with col1:
 with col2:
     audio = audio_recorder("", icon_size="lg")
 
+# التحويل الصوتي (إذا وُجد صوت)
 voice_text = ""
 if audio:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio_file:
@@ -126,10 +127,18 @@ if audio:
             st.toast("❌ لم يتم التعرف على الصوت")
     os.remove(temp_audio_file_path)
 
-# زر الإرسال (بدون on_click) مع المسح بعد الرد
+# زر الإرسال يدعم الإدخال الموحد (صوتي أو كتابي) ويمسح مربع الكتابة فقط
 if st.button("إرسال", use_container_width=True):
-    final_input = voice_text or st.session_state.input
-    if final_input:
+    # إذا هناك نص صوتي تم إدخاله الآن:
+    if voice_text.strip():
+        final_input = voice_text
+        st.session_state.input = ""
+    else:
+        final_input = st.session_state.input
+        st.session_state.input = ""
+
+    # تابع فقط إذا هناك نص فعلي للإرسال
+    if final_input.strip():
         menu_results = [m for m in menu if final_input in m["name"] or final_input in m["desc"] or final_input in m["type"]]
         if menu_results:
             msg = "إليك بعض الخيارات من المنيو لدينا:\n"
@@ -152,9 +161,6 @@ if st.button("إرسال", use_container_width=True):
                 ).choices[0].message.content.strip()
             st.session_state.history.append(("الزبون", final_input))
             st.session_state.history.append(("SmartServe", answer))
-        # فقط امسح الإدخال بدون rerun
-        st.session_state.input = ""
-
 
 # نموذج السلة
 st.markdown("<hr style='margin:10px 0;'>", unsafe_allow_html=True)
