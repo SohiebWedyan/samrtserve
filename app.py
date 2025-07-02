@@ -9,7 +9,7 @@ import os
 
 # --- إعدادات النموذج وواجهة الذكاء الاصطناعي ---
 HF_TOKEN = os.environ.get("HF_TOKEN")
-MODEL_ID = "HuggingFaceH4/zephyr-7b-beta"
+MODEL_ID = "Qwen/Qwen1.5-4B-Chat"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 
 # --- لوجو احترافي ---
