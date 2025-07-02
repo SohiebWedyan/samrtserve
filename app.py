@@ -126,36 +126,35 @@ if audio:
             st.toast("❌ لم يتم التعرف على الصوت")
     os.remove(temp_audio_file_path)
 
-final_input = voice_text or user_input
-
-# دالة لمسح مربع الإرسال بعد الإرسال
-def clear_input():
-    st.session_state.input = ""
-
-# ذكاء اصطناعي ومعالجة الطلب
-if final_input and st.button("إرسال", use_container_width=True, on_click=clear_input):
-    menu_results = [m for m in menu if final_input in m["name"] or final_input in m["desc"] or final_input in m["type"]]
-    if menu_results:
-        msg = "إليك بعض الخيارات من المنيو لدينا:\n"
-        for item in menu_results:
-            msg += f"- **{item['name']}**: {item['desc']}\n"
-        st.session_state.history.append(("الزبون", final_input))
-        st.session_state.history.append(("SmartServe", msg))
-    else:
-        msgs = [{"role": "system", "content": "أنت مساعد مطاعم ذكي ترد بالعربية الفصحى."}]
-        for s, m in st.session_state.history[-6:]:
-            msgs.append({"role": "user" if s == "الزبون" else "assistant", "content": m})
-        msgs.append({"role": "user", "content": final_input})
-        with st.spinner("جاري البحث الذكي ..."):
-            answer = client.chat.completions.create(
-                model=MODEL_ID,
-                messages=msgs,
-                temperature=0.3,
-                top_p=0.7,
-                max_tokens=256,
-            ).choices[0].message.content.strip()
-        st.session_state.history.append(("الزبون", final_input))
-        st.session_state.history.append(("SmartServe", answer))
+# زر الإرسال (بدون on_click) مع المسح بعد الرد
+if st.button("إرسال", use_container_width=True):
+    final_input = voice_text or st.session_state.input
+    if final_input:
+        menu_results = [m for m in menu if final_input in m["name"] or final_input in m["desc"] or final_input in m["type"]]
+        if menu_results:
+            msg = "إليك بعض الخيارات من المنيو لدينا:\n"
+            for item in menu_results:
+                msg += f"- **{item['name']}**: {item['desc']}\n"
+            st.session_state.history.append(("الزبون", final_input))
+            st.session_state.history.append(("SmartServe", msg))
+        else:
+            msgs = [{"role": "system", "content": "أنت مساعد مطاعم ذكي ترد بالعربية الفصحى."}]
+            for s, m in st.session_state.history[-6:]:
+                msgs.append({"role": "user" if s == "الزبون" else "assistant", "content": m})
+            msgs.append({"role": "user", "content": final_input})
+            with st.spinner("جاري البحث الذكي ..."):
+                answer = client.chat.completions.create(
+                    model=MODEL_ID,
+                    messages=msgs,
+                    temperature=0.3,
+                    top_p=0.7,
+                    max_tokens=256,
+                ).choices[0].message.content.strip()
+            st.session_state.history.append(("الزبون", final_input))
+            st.session_state.history.append(("SmartServe", answer))
+        # مسح الإدخال بعد الرد
+        st.session_state.input = ""
+        st.experimental_rerun()
 
 # نموذج السلة
 st.markdown("<hr style='margin:10px 0;'>", unsafe_allow_html=True)
