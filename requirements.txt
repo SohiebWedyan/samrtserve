@@ -7,3 +7,4 @@ beautifulsoup4
 rapidfuzz
 transformers
 torch
+huggingface_hub>=0.21.3
