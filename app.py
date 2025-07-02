@@ -7,10 +7,10 @@ from io import BytesIO
 import tempfile
 import os
 
+# إعداد API
+HF_TOKEN = "hf_..."  # ضع التوكن الخاص بك هنا أو استخدم open access إن أردت
 MODEL_ID = "HuggingFaceH4/zephyr-7b-beta"
-HF_TOKEN = os.environ.get("HF_TOKEN")
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
-
 
 menu = [
     {"name": "كبسة دجاج", "type": "لحوم", "desc": "أرز مع بهارات ودجاج"},
@@ -36,8 +36,12 @@ menu = [
 ]
 
 st.set_page_config(layout="centered", page_title="مساعد SmartServe الذكي")
-st.title("مساعد SmartServe الذكي 🌟")
-st.write("اسأل عن أي صنف أو وجبة (صوت أو كتابة) 👇")
+st.markdown("""
+    <style>
+    .stTextInput input { font-size:18px; direction:rtl; text-align:right; }
+    .stButton>button { font-size:18px; border-radius:8px; }
+    </style>
+""", unsafe_allow_html=True)
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -50,8 +54,7 @@ def search_menu(user_input):
             matches.append(item)
     return matches
 
-def ask_qwen(messages):
-    # رسائل في صيغة [{"role":"user"/"assistant", "content":...}]
+def ask_ai(messages):
     response = client.chat.completions.create(
         model=MODEL_ID,
         messages=messages,
@@ -61,8 +64,18 @@ def ask_qwen(messages):
     )
     return response.choices[0].message.content.strip()
 
-st.header("🗣️ إدخال صوتي")
-audio = audio_recorder("اضغط هنا لتسجيل صوتك 👇")
+# --- واجهة الإدخال في صف واحد ---
+st.markdown("<h2 style='text-align:right;'>👇 اسأل صوتيًا أو نصيًا</h2>", unsafe_allow_html=True)
+
+col1, col2, col3 = st.columns([2, 1, 1])
+with col1:
+    user_input = st.text_input("سؤالك أو طلبك:", key="input", placeholder="مثال: وجبة غداء نباتية ...", label_visibility="collapsed")
+with col2:
+    audio = audio_recorder("🎤", icon_size="1.5x")
+with col3:
+    submit = st.button("إرسال", use_container_width=True)
+
+# --- معالجة الصوت ---
 voice_text = ""
 if audio:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio_file:
@@ -78,11 +91,10 @@ if audio:
             st.error(f"خطأ في التعرف على الصوت: {e}")
     os.remove(temp_audio_file_path)
 
-st.header("⌨️ أو أدخل نصاً")
-user_input = st.text_input("سؤالك أو طلبك:")
 final_input = voice_text if voice_text else user_input
 
-if final_input and st.button("إرسال", use_container_width=True):
+# --- المنطق عند الإرسال ---
+if submit and final_input:
     menu_results = search_menu(final_input)
     if menu_results:
         msg = "إليك بعض الخيارات من المنيو لدينا:\n"
@@ -91,22 +103,23 @@ if final_input and st.button("إرسال", use_container_width=True):
         st.session_state.history.append(("أنت", final_input))
         st.session_state.history.append(("المساعد", msg))
     else:
-        # بناء الرسائل على شكل محادثة
         msgs = [{"role": "system", "content": "أنت مساعد مطاعم ذكي ترد بالعربية الفصحى وتوضح اقتراحات الطعام أو أي معلومات غذائية أو نصائح حول المنيو."}]
-        for s, m in st.session_state.history[-6:]:  # أضف سياق آخر 3 أسئلة وأجوبة
+        for s, m in st.session_state.history[-6:]:
             msgs.append({"role": "user" if s == "أنت" else "assistant", "content": m})
         msgs.append({"role": "user", "content": final_input})
-        with st.spinner("جاري البحث الذكي عبر الذكاء الصناعي ..."):
-            answer = ask_qwen(msgs)
+        with st.spinner("جاري البحث الذكي عبر الذكاء الاصطناعي ..."):
+            answer = ask_ai(msgs)
         st.session_state.history.append(("أنت", final_input))
         st.session_state.history.append(("المساعد", answer))
 
+# --- عرض الرسائل بشكل أنيق ---
 for sender, text in st.session_state.history[-8:]:
     if sender == "أنت":
         st.markdown(f"<div style='background:#e9f1ff; border-radius:14px; padding:10px; margin-bottom:4px; text-align:right'><b>🧑‍💼</b> {text}</div>", unsafe_allow_html=True)
     else:
         st.markdown(f"<div style='background:#fff8d6; border-radius:14px; padding:11px; margin-bottom:8px; font-weight:600; text-align:right'><b>🤖</b> {text}</div>", unsafe_allow_html=True)
 
+# --- إخراج صوتي ---
 if st.session_state.history and st.session_state.history[-1][0] == "المساعد":
     last_response = st.session_state.history[-1][1]
     tts = gTTS(last_response, lang="ar")
