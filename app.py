@@ -7,8 +7,7 @@ from io import BytesIO
 import tempfile
 import os
 
-# إعدادات الـ API
-import os
+
 HF_TOKEN = os.environ.get("HF_TOKEN")
 model = "NousResearch/Hermes-3-Llama-3.1-8B"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
