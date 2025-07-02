@@ -11,7 +11,7 @@ HF_TOKEN = os.environ.get("HF_TOKEN")
 MODEL_ID = "NousResearch/Hermes-3-Llama-3.1-8B"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 
-LOGO_URL = "https://raw.githubusercontent.com/sohiebwedyan/smartserve_logo/main/smartserve-logo-v2.png"
+LOGO_URL = "https://github.com/SohiebWedyan/samrtserve/edit/main/smartserve-logo-v2.png"
 
 menu = [
     {"name": "كبسة دجاج", "type": "لحوم", "desc": "أرز مع بهارات ودجاج"},
