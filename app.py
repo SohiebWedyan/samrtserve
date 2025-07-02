@@ -12,7 +12,7 @@ HF_TOKEN = os.environ.get("HF_TOKEN")
 MODEL_ID = "NousResearch/Hermes-3-Llama-3.1-8B"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 
-LOGO_URL = "https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
+LOGO_URL = "https://github.com/SohiebWedyan/samrtserve/blob/main/Screenshot%202025-07-02%20142729.png"
 
 menu = [
     {"name": "كبسة دجاج", "type": "لحوم", "desc": "أرز مع بهارات ودجاج"},
