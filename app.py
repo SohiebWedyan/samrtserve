@@ -93,7 +93,7 @@ LOGO_URL = "https://img.pikbest.com/png-images/20241111/-22creative-food-logo-co
 st.markdown(f"""
     <div style='text-align:center;'>
         <img src="{LOGO_URL}" style="width:85px; margin-bottom:-18px;" />
-        <div style='font-size:30px; font-weight:bold; color:#F9E27B;'>SmartServe</div>
+        <div style='font-size:30px; font-weight:bold; color:#F9E27B;'>SmartServe AI</div>
         <div style='font-size:17px;color:#FFFDEB;'>مساعد ذكي لطلبات الطعام والمشروبات</div>
     </div>
 """, unsafe_allow_html=True)
@@ -132,10 +132,12 @@ if st.button("إرسال", use_container_width=True):
     # إذا هناك نص صوتي تم إدخاله الآن:
     if voice_text.strip():
         final_input = voice_text
-        st.session_state.input = ""
+        if "input" in st.session_state:
+            st.session_state.input = ""   # امسح الكتابي فقط إذا استُخدم الصوت
     else:
         final_input = st.session_state.input
-        st.session_state.input = ""
+        if "input" in st.session_state:
+            st.session_state.input = ""   # امسح الكتابي بعد الإرسال
 
     # تابع فقط إذا هناك نص فعلي للإرسال
     if final_input.strip():
