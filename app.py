@@ -7,13 +7,15 @@ from io import BytesIO
 import tempfile
 import os
 
-# إعدادات النموذج
+# إعدادات نموذج الذكاء الاصطناعي
 HF_TOKEN = os.environ.get("HF_TOKEN")
 MODEL_ID = "NousResearch/Hermes-3-Llama-3.1-8B"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 
-LOGO_URL = "Screenshot 2025-07-02 142729.png"
+# لوجو (من GitHub)
+LOGO_URL = "https://github.com/SohiebWedyan/samrtserve/blob/main/Screenshot%202025-07-02%20142729.png"
 
+# قائمة الطعام
 menu = [
     {"name": "كبسة دجاج", "type": "لحوم", "desc": "أرز مع بهارات ودجاج"},
     {"name": "منسف أردني", "type": "لحوم", "desc": "لحم مع لبن وجوز هند"},
@@ -37,7 +39,8 @@ menu = [
     {"name": "نسكافيه", "type": "مشروبات ساخنة", "desc": "قهوة سريعة الذوبان"},
 ]
 
-st.set_page_config(layout="centered", page_title="SmartServe - مساعد الطلبات الذكي")
+# ==== CSS للتصميم الحديث والخلفية ====
+st.set_page_config(layout="centered", page_title="مساعد SmartServe AI الذكي")
 
 st.markdown("""
     <style>
@@ -47,36 +50,60 @@ st.markdown("""
         background-size: cover !important;
         font-family: 'Cairo', 'Tajawal', sans-serif !important;
     }
-    .main {background: rgba(30, 29, 29, 0.84) !important;}
+    .main {background: rgba(0, 0, 0, 0.55) !important; border-radius: 20px;}
     .bubble-user {
-        background: linear-gradient(90deg, #e3eaffb9 70%, #fff9e3a1 100%);
-        border-radius: 16px 0 16px 16px;
-        box-shadow: 0 2px 10px #0002;
-        margin-bottom: 6px; padding: 14px 17px 9px 14px; font-size:18px; text-align:right;
-        color:#232323;direction:rtl; max-width:77%; margin-left:auto; margin-right:3px;
+        background: rgba(20,20,28, 0.75);
+        border-radius: 18px 0 18px 18px;
+        box-shadow: 0 2px 12px #0005;
+        margin-bottom: 8px; padding: 14px 20px 9px 13px; font-size:19px; text-align:right;
+        color:#fff;direction:rtl; max-width:78%; margin-left:auto; margin-right:3px;
+        border:1.2px solid #FFF4;
     }
     .bubble-bot  {
-        background: linear-gradient(270deg, #fff9e3e7 70%, #e3eaff95 100%);
-        border-radius: 0 16px 16px 16px;
-        box-shadow: 0 2px 13px #0002;
-        margin-bottom: 10px; padding: 14px 17px 12px 14px; font-size:18px;
-        font-weight:600;text-align:right;color:#2d2210;direction:rtl; max-width:77%; margin-right:auto; margin-left:3px;
+        background: rgba(255,215,60,0.13);
+        border-radius: 0 18px 18px 18px;
+        box-shadow: 0 2px 10px #0006;
+        margin-bottom: 12px; padding: 14px 20px 11px 13px; font-size:19px;
+        font-weight:600;text-align:right;color:#ffe07f;direction:rtl; max-width:78%; margin-right:auto; margin-left:3px;
+        border:1.2px solid #ffe47b52;
+        text-shadow: 0 1px 6px #282100b0;
     }
-    .stTextInput input { font-size:19px; text-align:right; border-radius:8px;}
+    .stTextInput input {
+        font-size:19px; text-align:right; border-radius:10px;
+        background:rgba(25,25,25,0.80)!important; color:#fff!important;
+        border: 1.4px solid #ffd95b8f;
+    }
+    .stTextInput input::placeholder {color:#fff7;}
     .stButton>button {
-        background: linear-gradient(90deg,#ffd95b 50%, #fae18c 100%);
-        color: #232323; font-size:19px; font-weight:bold; border-radius:10px; padding:7px 0;
-        border: 1.3px solid #e7cf7b; box-shadow:0 2px 7px #c9ad5b40;
+        background: linear-gradient(90deg,#ffd95ba6 60%, #fae18c9c 100%);
+        color: #36321c; font-size:20px; font-weight:bold; border-radius:11px; padding:7px 0;
+        border: 1.8px solid #ffc14d; box-shadow:0 2px 11px #1d120480;
     }
-    .stButton>button:hover { background: #ffebaf !important; color: #a87e00;}
+    .stButton>button:hover { background: #ffeebc !important; color: #a87e00;}
     .icon-mic {
-        font-size: 30px !important;
-        margin-left: -6px;
-        color: #F9E27B;
-        filter: drop-shadow(1px 1px 3px #4447);
+        font-size: 32px !important;
+        margin-left: -8px;
+        color: #FFD95B;
+        filter: drop-shadow(1px 1px 4px #000c);
         cursor:pointer;
     }
-    /* Mobile */
+    .example-hint {
+        font-size:16.5px;color:#fff; background:rgba(0,0,0,0.42);border-radius:8px; padding:5px 15px; margin-bottom:13px;text-align:right;box-shadow:0 2px 8px #0003;
+        text-shadow:0 2px 8px #0007;
+    }
+    .app-header {
+        color: #ffe186;
+        text-shadow: 0 2px 15px #000c, 0 2px 4px #6a4a015c;
+        font-size: 32px;
+        letter-spacing:1px;
+        font-weight: 900;
+        margin-bottom: 4px;
+        margin-top: 7px;
+    }
+    .app-subheader {
+        font-size:18px;color:#fffbe9;margin-bottom:15px;
+        text-shadow:0 1px 7px #000c;
+    }
     @media only screen and (max-width: 600px) {
         .bubble-user, .bubble-bot {font-size:15px; padding: 10px 6px;}
         .main {border-radius:0;}
@@ -84,30 +111,26 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- Header ---
+# ---- رأس الصفحة واللوجو ----
 st.markdown(f"""
     <div style='text-align:center;margin-bottom:1px;'>
-        <img src="{LOGO_URL}" style="width:73px; margin-bottom:-14px;" />
-        <div style='font-size:29px; font-weight:900; color:#F9E27B; letter-spacing:1px; margin-bottom:4px; margin-top:10px;'>SmartServe</div>
-        <div style='font-size:17px;color:#faf4ce;margin-bottom:12px;'>مساعد ذكي لطلبات الطعام والمشروبات</div>
+        <img src="{LOGO_URL}" style="width:92px; margin-bottom:-16px;" />
+        <div class='app-header'>SmartServe</div>
+        <div class='app-subheader'>مساعد ذكي لطلبات الطعام والمشروبات</div>
     </div>
 """, unsafe_allow_html=True)
 
-# --- Animated Example ---
-st.markdown("""
-<div style='font-size:15px; color:#F9E27B; margin-bottom:13px;text-align:right;animation:fadein 1.5s;'>
-    <span style='animation:bounce 1s infinite alternate;display:inline-block;'>👇</span>
-    <b>مثال:</b>
-    <span style="background:#fff9e3aa;padding:2px 8px;border-radius:7px;">وجبة غداء نباتية</span>
-    أو
-    <span style="background:#e3eaffad;padding:2px 8px;border-radius:7px;">ما هي مكونات المنسف؟</span>
-</div>
-<style>
-@keyframes bounce { 0%{transform:translateY(0);} 100%{transform:translateY(6px);} }
-@keyframes fadein { from{opacity:0;} to{opacity:1;} }
-</style>
-""", unsafe_allow_html=True)
+# ---- مثال أسفل العنوان ----
+st.markdown(
+    """
+    <div class='example-hint'>
+        👇 <b>مثال:</b> <b>وجبة غداء نباتية</b> أو <b>ما هي مكونات المنسف؟</b>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
+# ==== سجل المحادثة ====
 if "history" not in st.session_state:
     st.session_state.history = []
 
@@ -129,7 +152,7 @@ def ask_ai(messages):
     )
     return response.choices[0].message.content.strip()
 
-# --- إدخال نص وصوت (بنفس السطر) ---
+# ---- إدخال نص وصوت بنفس الصف ----
 col1, col2 = st.columns([8,1], gap="small")
 with col1:
     user_input = st.text_input("", placeholder="اكتب هنا أو استخدم المايك...", key="input", label_visibility="collapsed")
@@ -153,6 +176,7 @@ if audio:
 
 final_input = voice_text if voice_text else user_input
 
+# --- زر إرسال ومعالجة ---
 if final_input and st.button("إرسال", use_container_width=True):
     menu_results = search_menu(final_input)
     if menu_results:
@@ -171,14 +195,14 @@ if final_input and st.button("إرسال", use_container_width=True):
         st.session_state.history.append(("الزبون", final_input))
         st.session_state.history.append(("SmartServe", answer))
 
-# --- عرض المحادثة بشكل فقاعات ---
+# ---- عرض المحادثة ----
 for sender, text in st.session_state.history[-8:]:
     if sender == "الزبون":
         st.markdown(f"<div class='bubble-user'><b>👤 الزبون:</b><br>{text}</div>", unsafe_allow_html=True)
     else:
         st.markdown(f"<div class='bubble-bot'><b>🤖 SmartServe:</b><br>{text}</div>", unsafe_allow_html=True)
 
-# --- إخراج صوتي ---
+# ---- إخراج صوتي ----
 if st.session_state.history and st.session_state.history[-1][0] == "SmartServe":
     last_response = st.session_state.history[-1][1]
     tts = gTTS(last_response, lang="ar")
@@ -186,11 +210,3 @@ if st.session_state.history and st.session_state.history[-1][0] == "SmartServe":
     tts.write_to_fp(fp)
     fp.seek(0)
     st.audio(fp.read(), format="audio/mp3")
-
-# --- Footer بسيط ---
-st.markdown("""
-<div style='text-align:center; color:#ffe187; font-size:13px; margin-top:30px;'>
-    تصميم <a href="https://github.com/sohiebwedyan" style="color:#fff9e3;text-decoration:underline;font-weight:700;" target="_blank">Sohieb Wedyan</a>
-    | Powered by Hermes-Llama3 | <a href='https://github.com/sohiebwedyan' style="color:#bdbdbd;" target="_blank">GitHub</a>
-</div>
-""", unsafe_allow_html=True)
