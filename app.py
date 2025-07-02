@@ -9,7 +9,7 @@ import os
 
 # --- إعدادات النموذج وواجهة الذكاء الاصطناعي ---
 HF_TOKEN = os.environ.get("HF_TOKEN")
-MODEL_ID = "HuggingFaceH4/zephyr-7b-beta"
+MODEL_ID = "NousResearch/Hermes-3-Llama-3.1-8B"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 
 # --- لوجو احترافي (رابط خارجي شغال دائماً) ---
