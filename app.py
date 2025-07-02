@@ -5,50 +5,14 @@ import speech_recognition as sr
 from gtts import gTTS
 from io import BytesIO
 import tempfile
-from PIL import Image
-import base64
-
 import os
 
+# إعدادات الـ API
+import os
 HF_TOKEN = os.environ.get("HF_TOKEN")
-MODEL_ID = "HuggingFaceH4/zephyr-7b-beta"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
-
-# --- إضافة اللوجو ---
-def get_logo_base64():
-    logo_url = "https://raw.githubusercontent.com/sohiebwedyan/smartserve_logo/main/smartserve-logo-v2.png"
-    import requests
-    response = requests.get(logo_url)
-    if response.status_code == 200:
-        return base64.b64encode(response.content).decode()
-    return None
-
-logo_base64 = get_logo_base64()
-if logo_base64:
-    st.markdown(
-        f"""
-        <div style="text-align:center; margin-bottom:-25px;">
-            <img src="data:image/png;base64,{logo_base64}" alt="SmartServe Logo" width="120"/>
-        </div>
-        """, unsafe_allow_html=True
-    )
-
-# --- مثال الطلب والرد ---
-st.markdown(
-    """
-    <div style='background:#f5f8fe;border-radius:10px;padding:12px 16px;margin-bottom:18px;text-align:right;font-size:17px'>
-        <b>مثال:</b><br>
-        <span style='color:#324884'>👤 الزبون:</span> <i>أريد وجبة غداء نباتية</i><br>
-        <span style='color:#84601f'>🤖 SmartServe:</span> <i>إليك بعض الخيارات النباتية: بيتزا مارغريتا، سلطة فتوش، حمص، فلافل...</i>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-# --- بقية كودك هنا ---
-# ...
-
-
+# لوجو SmartServe (يمكنك تغييره برابط آخر)
+LOGO_URL = "https://raw.githubusercontent.com/sohiebwedyan/smartserve_logo/main/smartserve-logo-v2.png"
 
 menu = [
     {"name": "كبسة دجاج", "type": "لحوم", "desc": "أرز مع بهارات ودجاج"},
@@ -73,13 +37,40 @@ menu = [
     {"name": "نسكافيه", "type": "مشروبات ساخنة", "desc": "قهوة سريعة الذوبان"},
 ]
 
+# ========== إعدادات الصفحة وتنسيقات CSS ==========
 st.set_page_config(layout="centered", page_title="مساعد SmartServe الذكي")
 st.markdown("""
     <style>
-    .stTextInput input { font-size:18px; direction:rtl; text-align:right; }
-    .stButton>button { font-size:18px; border-radius:8px; }
+    body, .stApp { background-color: #18191c !important; }
+    .main { background-color: #18191c !important; }
+    .msg-user {background:#e7f1ff;border-radius:14px;padding:12px 17px;margin-bottom:4px;font-size:17px;text-align:right;color:#232323;direction:rtl}
+    .msg-bot  {background:#fff9e3;border-radius:14px;padding:13px 17px;margin-bottom:9px;font-weight:600;font-size:17px;text-align:right;color:#363616;direction:rtl}
+    .stTextInput input { font-size:17px; text-align:right; }
+    .stButton>button {font-size:17px;border-radius:8px;margin-top:1px;}
+    @media only screen and (max-width: 600px) {
+        .msg-user, .msg-bot {font-size:15px; padding: 11px 8px;}
+    }
     </style>
 """, unsafe_allow_html=True)
+
+# لوجو ومقدمة أعلى الصفحة
+st.markdown(f"""
+    <div style='text-align:center;margin-bottom:1px;'>
+        <img src="{LOGO_URL}" style="width:85px; margin-bottom:-18px" />
+        <div style='font-size:30px; font-weight:bold; color:#F9E27B; margin-bottom:4px; margin-top:10px;'>SmartServe</div>
+        <div style='font-size:17px;color:#F7F6F4;margin-bottom:8px;'>مساعد ذكي لطلبات الطعام والمشروبات</div>
+    </div>
+""", unsafe_allow_html=True)
+
+# مثال تحت الإدخال
+st.markdown(
+    """
+    <div style='font-size:15px;color:#F9E27B;margin-bottom:10px;text-align:right'>
+        👇 مثال: <b>وجبة غداء نباتية</b> أو <b>ما هي مكونات المنسف؟</b>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -93,6 +84,7 @@ def search_menu(user_input):
     return matches
 
 def ask_ai(messages):
+    # محادثة مع نموذج الدردشة
     response = client.chat.completions.create(
         model=MODEL_ID,
         messages=messages,
@@ -102,18 +94,13 @@ def ask_ai(messages):
     )
     return response.choices[0].message.content.strip()
 
-# --- واجهة الإدخال في صف واحد ---
-st.markdown("<h2 style='text-align:right;'>👇 اسأل صوتيًا أو نصيًا</h2>", unsafe_allow_html=True)
-
-col1, col2, col3 = st.columns([2, 1, 1])
+# =========== إدخال نص وصوت (في صف واحد) ============
+col1, col2 = st.columns([8,1], gap="small")
 with col1:
-    user_input = st.text_input("سؤالك أو طلبك:", key="input", placeholder="مثال: وجبة غداء نباتية ...", label_visibility="collapsed")
+    user_input = st.text_input("", placeholder="اكتب هنا أو استخدم المايك...", key="input", label_visibility="collapsed")
 with col2:
-    audio = audio_recorder("🎤", icon_size="1.5x")
-with col3:
-    submit = st.button("إرسال", use_container_width=True)
+    audio = audio_recorder("", icon_size="lg")
 
-# --- معالجة الصوت ---
 voice_text = ""
 if audio:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio_file:
@@ -131,34 +118,35 @@ if audio:
 
 final_input = voice_text if voice_text else user_input
 
-# --- المنطق عند الإرسال ---
-if submit and final_input:
+# =========== زر إرسال ومعالجة ============
+if final_input and st.button("إرسال", use_container_width=True):
     menu_results = search_menu(final_input)
     if menu_results:
         msg = "إليك بعض الخيارات من المنيو لدينا:\n"
         for item in menu_results:
             msg += f"- **{item['name']}**: {item['desc']}\n"
-        st.session_state.history.append(("أنت", final_input))
-        st.session_state.history.append(("المساعد", msg))
+        st.session_state.history.append(("الزبون", final_input))
+        st.session_state.history.append(("SmartServe", msg))
     else:
+        # استخدم الذكاء الاصطناعي
         msgs = [{"role": "system", "content": "أنت مساعد مطاعم ذكي ترد بالعربية الفصحى وتوضح اقتراحات الطعام أو أي معلومات غذائية أو نصائح حول المنيو."}]
         for s, m in st.session_state.history[-6:]:
-            msgs.append({"role": "user" if s == "أنت" else "assistant", "content": m})
+            msgs.append({"role": "user" if s == "الزبون" else "assistant", "content": m})
         msgs.append({"role": "user", "content": final_input})
-        with st.spinner("جاري البحث الذكي عبر الذكاء الاصطناعي ..."):
+        with st.spinner("جاري البحث الذكي ..."):
             answer = ask_ai(msgs)
-        st.session_state.history.append(("أنت", final_input))
-        st.session_state.history.append(("المساعد", answer))
+        st.session_state.history.append(("الزبون", final_input))
+        st.session_state.history.append(("SmartServe", answer))
 
-# --- عرض الرسائل بشكل أنيق ---
+# =========== عرض رسائل المحادثة ============
 for sender, text in st.session_state.history[-8:]:
-    if sender == "أنت":
-        st.markdown(f"<div style='background:#e9f1ff; border-radius:14px; padding:10px; margin-bottom:4px; text-align:right'><b>🧑‍💼</b> {text}</div>", unsafe_allow_html=True)
+    if sender == "الزبون":
+        st.markdown(f"<div class='msg-user'><b>👤 الزبون:</b><br>{text}</div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div style='background:#fff8d6; border-radius:14px; padding:11px; margin-bottom:8px; font-weight:600; text-align:right'><b>🤖</b> {text}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='msg-bot'><b>🤖 SmartServe:</b><br>{text}</div>", unsafe_allow_html=True)
 
-# --- إخراج صوتي ---
-if st.session_state.history and st.session_state.history[-1][0] == "المساعد":
+# =========== إخراج صوتي ============
+if st.session_state.history and st.session_state.history[-1][0] == "SmartServe":
     last_response = st.session_state.history[-1][1]
     tts = gTTS(last_response, lang="ar")
     fp = BytesIO()
