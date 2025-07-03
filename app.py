@@ -6,42 +6,23 @@ from gtts import gTTS
 from io import BytesIO
 import tempfile
 import os
-import sqlite3
 from datetime import datetime
+
+# مكتبات فايربيس
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+# --- إعداد فايربيس ---
+FIREBASE_KEY = 'smartserve-multirestaurant-firebase-adminsdk-fbsvc-1ed7850c3f.json'
+if not firebase_admin._apps:
+    cred = credentials.Certificate(FIREBASE_KEY)
+    firebase_admin.initialize_app(cred)
+db = firestore.client()
 
 # إعدادات النموذج
 HF_TOKEN = os.environ.get("HF_TOKEN")
 MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
-
-# تهيئة قاعدة البيانات
-DB_FILE = "orders.db"
-def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS orders (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        timestamp TEXT,
-        table_number TEXT,
-        item_name TEXT,
-        quantity INTEGER,
-        notes TEXT
-    )''')
-    conn.commit()
-    conn.close()
-init_db()
-
-# دالة إضافة الطلب لقاعدة البيانات
-def add_order_to_db(cart_items, table_number):
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    for item in cart_items:
-        c.execute('''INSERT INTO orders (timestamp, table_number, item_name, quantity, notes)
-                     VALUES (?, ?, ?, ?, ?)''',
-                  (datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                   table_number, item["name"], item["qty"], item["notes"]))
-    conn.commit()
-    conn.close()
 
 # قائمة الطعام
 menu = [
@@ -66,6 +47,15 @@ menu = [
     {"name": "كابتشينو", "type": "مشروبات ساخنة", "desc": "إسبريسو مع حليب رغوي"},
     {"name": "نسكافيه", "type": "مشروبات ساخنة", "desc": "قهوة سريعة الذوبان"},
 ]
+
+# --- دالة إضافة الطلب لـ Firestore ---
+def add_order_to_firestore(cart_items, table_number):
+    order = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "table_number": table_number,
+        "items": cart_items
+    }
+    db.collection("orders").add(order)
 
 # إعدادات الواجهة
 st.set_page_config(layout="centered", page_title="SmartServe AI")
@@ -234,7 +224,7 @@ with st.sidebar:
             elif not st.session_state.table_number.strip():
                 st.warning("يرجى إدخال رقم الطاولة.")
             else:
-                add_order_to_db(st.session_state.cart, st.session_state.table_number.strip())
+                add_order_to_firestore(st.session_state.cart, st.session_state.table_number.strip())
                 st.success("تم إرسال الطلب بنجاح!")
                 st.session_state.cart.clear()
 
@@ -266,7 +256,7 @@ if st.session_state.cart:
         elif not st.session_state.table_number.strip():
             st.warning("يرجى إدخال رقم الطاولة.")
         else:
-            add_order_to_db(st.session_state.cart, st.session_state.table_number.strip())
+            add_order_to_firestore(st.session_state.cart, st.session_state.table_number.strip())
             st.success("تم إرسال الطلب بنجاح!")
             st.session_state.cart.clear()
 
