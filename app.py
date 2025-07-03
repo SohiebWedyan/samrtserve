@@ -6,24 +6,42 @@ from gtts import gTTS
 from io import BytesIO
 import tempfile
 import os
+import sqlite3
 from datetime import datetime
 
-# اتصال Google Sheets
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+# إعدادات النموذج
+HF_TOKEN = os.environ.get("HF_TOKEN")
+MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
+client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 
-scope = [
-    'https://spreadsheets.google.com/feeds',
-    'https://www.googleapis.com/auth/drive'
-]
-creds = ServiceAccountCredentials.from_json_keyfile_name(
-    'gen-lang-client-0062251257-04dccc58918d.json', scope
-)
-client = gspread.authorize(creds)
+# تهيئة قاعدة البيانات
+DB_FILE = "orders.db"
+def init_db():
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp TEXT,
+        table_number TEXT,
+        item_name TEXT,
+        quantity INTEGER,
+        notes TEXT
+    )''')
+    conn.commit()
+    conn.close()
+init_db()
 
-SHEET_ID = '1E3SIGQjSYfD_YoKOlkIxApKqMu6yBCWEFlqja1RyG2c'
-sh = client.open_by_key(SHEET_ID)
-worksheet = sh.sheet1  # يمكنك تغييرها إذا كان اسم الورقة مختلف
+# دالة إضافة الطلب لقاعدة البيانات
+def add_order_to_db(cart_items, table_number):
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    for item in cart_items:
+        c.execute('''INSERT INTO orders (timestamp, table_number, item_name, quantity, notes)
+                     VALUES (?, ?, ?, ?, ?)''',
+                  (datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                   table_number, item["name"], item["qty"], item["notes"]))
+    conn.commit()
+    conn.close()
 
 # قائمة الطعام
 menu = [
@@ -48,17 +66,6 @@ menu = [
     {"name": "كابتشينو", "type": "مشروبات ساخنة", "desc": "إسبريسو مع حليب رغوي"},
     {"name": "نسكافيه", "type": "مشروبات ساخنة", "desc": "قهوة سريعة الذوبان"},
 ]
-
-# دالة حفظ الطلب في Google Sheets
-def add_order_to_sheet(cart_items, table_number):
-    for item in cart_items:
-        worksheet.append_row([
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            table_number,
-            item["name"],
-            item["qty"],
-            item["notes"]
-        ])
 
 # إعدادات الواجهة
 st.set_page_config(layout="centered", page_title="SmartServe AI")
@@ -227,7 +234,7 @@ with st.sidebar:
             elif not st.session_state.table_number.strip():
                 st.warning("يرجى إدخال رقم الطاولة.")
             else:
-                add_order_to_sheet(st.session_state.cart, st.session_state.table_number.strip())
+                add_order_to_db(st.session_state.cart, st.session_state.table_number.strip())
                 st.success("تم إرسال الطلب بنجاح!")
                 st.session_state.cart.clear()
 
@@ -259,7 +266,7 @@ if st.session_state.cart:
         elif not st.session_state.table_number.strip():
             st.warning("يرجى إدخال رقم الطاولة.")
         else:
-            add_order_to_sheet(st.session_state.cart, st.session_state.table_number.strip())
+            add_order_to_db(st.session_state.cart, st.session_state.table_number.strip())
             st.success("تم إرسال الطلب بنجاح!")
             st.session_state.cart.clear()
 
