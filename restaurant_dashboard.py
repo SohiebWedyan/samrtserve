@@ -6,6 +6,22 @@ st.markdown("<h2 style='color:#F9E27B;text-align:center;'>لوحة الطلبا�
 
 DB_FILE = "orders.db"
 
+def init_db():
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT,
+            table_number TEXT,
+            item_name TEXT,
+            quantity INTEGER,
+            notes TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
 def load_orders():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
@@ -23,6 +39,9 @@ def clear_orders():
     conn.commit()
     conn.close()
 
+# ⭐️ تهيئة قاعدة البيانات
+init_db()
+
 st.info("يتم تحديث الطلبات تلقائياً عند كل تحديث للصفحة (يمكنك الضغط F5 أو ↻)")
 
 orders = load_orders()
@@ -30,7 +49,6 @@ if not orders:
     st.warning("لا يوجد طلبات جديدة حالياً.")
 else:
     grouped = {}
-    # تجميع الأصناف حسب رقم الطلب والتاريخ
     for row in orders:
         order_id, timestamp, table_number, item_name, quantity, notes = row
         key = (timestamp, table_number)
@@ -41,7 +59,6 @@ else:
             "quantity": quantity,
             "notes": notes
         })
-    # عرض الطلبات
     for idx, ((timestamp, table_number), items) in enumerate(sorted(grouped.items(), reverse=True)):
         st.markdown(f"""
             <div style="background:#26282b;border-radius:14px;padding:13px 17px;margin-bottom:12px;">
