@@ -6,18 +6,8 @@ from gtts import gTTS
 from io import BytesIO
 import tempfile
 import os
+import json
 from datetime import datetime
-
-# مكتبات فايربيس
-import firebase_admin
-from firebase_admin import credentials, firestore
-
-# --- إعداد فايربيس ---
-FIREBASE_KEY = 'smartserve-multirestaurant-firebase-adminsdk-fbsvc-1ed7850c3f.json'
-if not firebase_admin._apps:
-    cred = credentials.Certificate(FIREBASE_KEY)
-    firebase_admin.initialize_app(cred)
-db = firestore.client()
 
 # إعدادات النموذج
 HF_TOKEN = os.environ.get("HF_TOKEN")
@@ -48,14 +38,27 @@ menu = [
     {"name": "نسكافيه", "type": "مشروبات ساخنة", "desc": "قهوة سريعة الذوبان"},
 ]
 
-# --- دالة إضافة الطلب لـ Firestore ---
-def add_order_to_firestore(cart_items, table_number):
+# --- دالة حفظ الطلب في ملف مشترك ---
+ORDERS_FILE = "orders.json"
+
+def add_order_to_file(cart_items, table_number):
     order = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "table_number": table_number,
         "items": cart_items
     }
-    db.collection("orders").add(order)
+    # تحميل الطلبات الحالية
+    if os.path.exists(ORDERS_FILE):
+        with open(ORDERS_FILE, "r", encoding="utf-8") as f:
+            try:
+                orders = json.load(f)
+            except:
+                orders = []
+    else:
+        orders = []
+    orders.append(order)
+    with open(ORDERS_FILE, "w", encoding="utf-8") as f:
+        json.dump(orders, f, ensure_ascii=False, indent=2)
 
 # إعدادات الواجهة
 st.set_page_config(layout="centered", page_title="SmartServe AI")
@@ -224,7 +227,7 @@ with st.sidebar:
             elif not st.session_state.table_number.strip():
                 st.warning("يرجى إدخال رقم الطاولة.")
             else:
-                add_order_to_firestore(st.session_state.cart, st.session_state.table_number.strip())
+                add_order_to_file(st.session_state.cart, st.session_state.table_number.strip())
                 st.success("تم إرسال الطلب بنجاح!")
                 st.session_state.cart.clear()
 
@@ -256,7 +259,7 @@ if st.session_state.cart:
         elif not st.session_state.table_number.strip():
             st.warning("يرجى إدخال رقم الطاولة.")
         else:
-            add_order_to_firestore(st.session_state.cart, st.session_state.table_number.strip())
+            add_order_to_file(st.session_state.cart, st.session_state.table_number.strip())
             st.success("تم إرسال الطلب بنجاح!")
             st.session_state.cart.clear()
 
