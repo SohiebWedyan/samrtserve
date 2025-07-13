@@ -20,9 +20,8 @@ RESTAURANT_ID = RESTAURANTS[restaurant_name]
 st.set_page_config(layout="centered", page_title="لوحة إدارة المطعم")
 st.markdown("<h2 style='color:#F9E27B;text-align:center;'>لوحة الطلبات - SmartServe AI</h2>", unsafe_allow_html=True)
 
-# ✅ التحديث التلقائي الصحيح كل 10 ثواني
-st_autorefresh = st.experimental_rerun if "rerun" in st.session_state else st.session_state.setdefault("rerun", True)
-st_autorefresh = st.experimental_autorefresh(interval=10*1000, key="refresh")  # 10 ثواني
+if st.button("🔄 تحديث الطلبات"):
+    st.experimental_rerun()
 
 def get_orders():
     orders_ref = db.collection("restaurants").document(RESTAURANT_ID).collection("orders")
