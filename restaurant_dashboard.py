@@ -2,6 +2,8 @@ import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, firestore
 import json 
+from streamlit_autorefresh import st_autorefresh   # <-- أضف هذا
+
 # تهيئة Firebase Admin مرة واحدة فقط
 if not firebase_admin._apps:
     firebase_key = st.secrets["FIREBASE_KEY"]
@@ -12,6 +14,10 @@ db = firestore.client()
 RESTAURANT_ID = "restaurant1"
 
 st.set_page_config(layout="centered", page_title="لوحة إدارة المطعم")
+
+# إعادة تحميل الصفحة كل 5 ثواني تلقائيا
+st_autorefresh(interval=5000, key="refresh_orders")
+
 st.markdown("<h2 style='color:#F9E27B;text-align:center;'>لوحة الطلبات - SmartServe AI</h2>", unsafe_allow_html=True)
 
 # قراءة الطلبات من فايربيز
