@@ -6,11 +6,23 @@ from gtts import gTTS
 from io import BytesIO
 import tempfile
 import os
-import json
 from datetime import datetime
 
+# --- إعداد firebase admin ---
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+# تحميل credentials مرة واحدة فقط
+if "firebase_app" not in st.session_state:
+    cred = credentials.Certificate("smartserve-multirestaurant-firebase-adminsdk-fbsvc-1ed7850c3f.json")
+    firebase_admin.initialize_app(cred)
+    st.session_state["firebase_app"] = True
+
+db = firestore.client()
+RESTAURANT_ID = "restaurant1"  # غيره لو عندك أكثر من مطعم لاحقاً
+
 # إعدادات النموذج
-HF_TOKEN = os.environ.get("HF_TOKEN")
+HF_TOKEN = "ضع_توكن_Huggingface_هنا"
 MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 
@@ -38,27 +50,14 @@ menu = [
     {"name": "نسكافيه", "type": "مشروبات ساخنة", "desc": "قهوة سريعة الذوبان"},
 ]
 
-# --- دالة حفظ الطلب في ملف مشترك ---
-ORDERS_FILE = "orders.json"
-
-def add_order_to_file(cart_items, table_number):
-    order = {
+# --- دالة رفع الطلب إلى فايربيز ---
+def add_order_to_firebase(cart_items, table_number):
+    doc = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "table_number": table_number,
         "items": cart_items
     }
-    # تحميل الطلبات الحالية
-    if os.path.exists(ORDERS_FILE):
-        with open(ORDERS_FILE, "r", encoding="utf-8") as f:
-            try:
-                orders = json.load(f)
-            except:
-                orders = []
-    else:
-        orders = []
-    orders.append(order)
-    with open(ORDERS_FILE, "w", encoding="utf-8") as f:
-        json.dump(orders, f, ensure_ascii=False, indent=2)
+    db.collection("restaurants").document(RESTAURANT_ID).collection("orders").add(doc)
 
 # إعدادات الواجهة
 st.set_page_config(layout="centered", page_title="SmartServe AI")
@@ -227,7 +226,7 @@ with st.sidebar:
             elif not st.session_state.table_number.strip():
                 st.warning("يرجى إدخال رقم الطاولة.")
             else:
-                add_order_to_file(st.session_state.cart, st.session_state.table_number.strip())
+                add_order_to_firebase(st.session_state.cart, st.session_state.table_number.strip())
                 st.success("تم إرسال الطلب بنجاح!")
                 st.session_state.cart.clear()
 
@@ -259,7 +258,7 @@ if st.session_state.cart:
         elif not st.session_state.table_number.strip():
             st.warning("يرجى إدخال رقم الطاولة.")
         else:
-            add_order_to_file(st.session_state.cart, st.session_state.table_number.strip())
+            add_order_to_firebase(st.session_state.cart, st.session_state.table_number.strip())
             st.success("تم إرسال الطلب بنجاح!")
             st.session_state.cart.clear()
 
