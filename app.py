@@ -8,20 +8,28 @@ import tempfile
 import os
 from datetime import datetime
 import json
-# --- إعداد firebase admin ---
+
+# --- firebase إعداد ---
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-# تحميل credentials مرة واحدة فقط
+# إعداد فايربيز مرة واحدة
 if not firebase_admin._apps:
     firebase_key = st.secrets["FIREBASE_KEY"]
     cred = credentials.Certificate(json.loads(firebase_key))
     firebase_admin.initialize_app(cred)
-
 db = firestore.client()
-RESTAURANT_ID = "restaurant1"  # غيره لو عندك أكثر من مطعم لاحقاً
 
-# إعدادات النموذج
+# --- قائمة المطاعم (id : الاسم) ---
+RESTAURANTS = {
+    "مطعم النخيل": "restaurant1",
+    "مطعم زهرة الربيع": "restaurant2",
+    "مطعم البرج": "restaurant3"
+}
+restaurant_name = st.selectbox("اختر المطعم الذي تطلب منه:", list(RESTAURANTS.keys()))
+RESTAURANT_ID = RESTAURANTS[restaurant_name]
+
+# إعدادات النموذج (اختياري)
 HF_TOKEN = os.environ.get("HF_TOKEN")
 MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
@@ -50,51 +58,24 @@ menu = [
     {"name": "نسكافيه", "type": "مشروبات ساخنة", "desc": "قهوة سريعة الذوبان"},
 ]
 
-# --- دالة رفع الطلب إلى فايربيز ---
+# دالة رفع الطلب
 def add_order_to_firebase(cart_items, table_number):
     order = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "table_number": table_number,
         "items": cart_items
     }
-    RESTAURANT_ID = "restaurant1"
     orders_ref = db.collection("restaurants").document(RESTAURANT_ID).collection("orders")
     orders_ref.add(order)
 
-
-# إعدادات الواجهة
+# إعدادات الواجهة (تصميم)
 st.set_page_config(layout="centered", page_title="SmartServe AI")
 st.markdown("""
 <style>
-#MainMenu, header, footer, .st-emotion-cache-18ni7ap.ezrtsby0 {visibility: hidden;}
+#MainMenu, header, footer {visibility: hidden;}
 body, .stApp {
     background: url('https://wallpapers.com/images/featured/restaurant-background-2ez77umko2vj5w02.jpg') no-repeat center center fixed !important;
     background-size: cover !important;
-}
-.main {
-    background: rgba(24, 25, 28, 0.78) !important;
-    border-radius: 18px;
-}
-.msg-user {
-    background: #222b2ecc;
-    border-radius: 14px;
-    padding: 12px 17px;
-    margin-bottom: 4px;
-    font-size: 17px;
-    text-align: right;
-    color: #cfcfcf;
-    direction: rtl;
-}
-.msg-bot {
-    background: #242110cc;
-    border-radius: 14px;
-    padding: 13px 17px;
-    margin-bottom: 9px;
-    font-weight: 600;
-    font-size: 17px;
-    text-align: right;
-    color: #ffe48c;
-    direction: rtl;
 }
 .cart-box {
     background: #1e222aee;
@@ -108,9 +89,6 @@ body, .stApp {
 }
 .stTextInput input { font-size:17px; text-align:right; }
 .stButton>button {font-size:17px;border-radius:8px;margin-top:1px;}
-@media only screen and (max-width: 600px) {
-    .msg-user, .msg-bot, .cart-box {font-size:15px; padding: 11px 8px;}
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -125,14 +103,11 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # سجل الجلسة
-if "history" not in st.session_state:
-    st.session_state.history = []
-if "cart" not in st.session_state:
-    st.session_state.cart = []
-if "table_number" not in st.session_state:
-    st.session_state.table_number = ""
+if "history" not in st.session_state: st.session_state.history = []
+if "cart" not in st.session_state: st.session_state.cart = []
+if "table_number" not in st.session_state: st.session_state.table_number = ""
 
-# --- حقل رقم الطاولة ---
+# رقم الطاولة
 st.markdown("**رقم الطاولة**", unsafe_allow_html=True)
 table_number = st.text_input("أدخل رقم الطاولة", key="table_input", value=st.session_state.table_number)
 if table_number != st.session_state.table_number:
@@ -145,7 +120,7 @@ with col1:
 with col2:
     audio = audio_recorder("", icon_size="lg")
 
-# التحويل الصوتي (إذا وُجد صوت)
+# التحويل الصوتي
 voice_text = ""
 if audio:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio_file:
@@ -161,7 +136,7 @@ if audio:
             st.toast("❌ لم يتم التعرف على الصوت")
     os.remove(temp_audio_file_path)
 
-# زر الإرسال يدعم الإدخال الموحد (صوتي أو كتابي)
+# زر الإرسال (ذكاء صناعي)
 if st.button("إرسال", use_container_width=True):
     if voice_text.strip():
         final_input = voice_text
@@ -239,7 +214,7 @@ for sender, text in st.session_state.history[-8:]:
     icon = "👤" if sender == "الزبون" else "🤖"
     st.markdown(f"<div class='{class_name}'><b>{icon} {sender}:</b><br>{text}</div>", unsafe_allow_html=True)
 
-# --- عرض السلة أيضاً أسفل الصفحة (للجوال/كل الشاشات) ---
+# --- عرض السلة أسفل الصفحة ---
 if st.session_state.cart:
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown("<div style='font-size:20px;color:#ffe48c;font-weight:700;text-align:right;'>🛒 سلة الطلبات الحالية</div>", unsafe_allow_html=True)
@@ -265,7 +240,7 @@ if st.session_state.cart:
             st.success("تم إرسال الطلب بنجاح!")
             st.session_state.cart.clear()
 
-# --- إخراج صوتي للرد الأخير ---
+# إخراج صوتي للرد الأخير
 if st.session_state.history and st.session_state.history[-1][0] == "SmartServe":
     last_response = st.session_state.history[-1][1]
     tts = gTTS(last_response, lang="ar")
