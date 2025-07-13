@@ -72,36 +72,25 @@ def add_order_to_firebase(cart_items, table_number):
 st.set_page_config(layout="centered", page_title="SmartServe AI")
 st.markdown("""
 <style>
+#MainMenu, header, footer {visibility: hidden;}
 body, .stApp {
     background: url('https://wallpapers.com/images/featured/restaurant-background-2ez77umko2vj5w02.jpg') no-repeat center center fixed !important;
     background-size: cover !important;
-    position: relative;
 }
-.stApp:before {
-    content: '';
-    position: fixed;
-    left: 0; top: 0; width: 100vw; height: 100vh;
-    background: rgba(20,20,20,0.60);
-    z-index: 0;
+.cart-box {
+    background: #1e222aee;
+    border-radius: 14px;
+    padding: 13px 15px;
+    margin-bottom: 12px;
+    font-size: 17px;
+    color: #fff;
+    direction: rtl;
+    border: 2px solid #444;
 }
-.st-emotion-cache-1v0mbdj, .msg-user, .msg-bot, .cart-box {
-    position: relative;
-    z-index: 1;
-}
-.msg-user, .msg-bot {
-    font-size: 20px !important;
-    color: #fff !important;
-    font-weight: bold !important;
-    text-shadow: 2px 2px 5px #111, 0px 1px 8px #000a;
-    background: rgba(20,20,20,0.57) !important;
-    border-radius: 16px !important;
-    padding: 14px 20px !important;
-}
+.stTextInput input { font-size:17px; text-align:right; }
+.stButton>button {font-size:17px;border-radius:8px;margin-top:1px;}
 </style>
 """, unsafe_allow_html=True)
-
-
-
 
 # لوجو ومقدمة
 LOGO_URL = "https://img.pikbest.com/png-images/20241111/-22creative-food-logo-collection-for-culinary-brands-22_11079861.png!sw800"
