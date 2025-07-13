@@ -1,4 +1,28 @@
 import streamlit as st
+
+def check_firestore_connection():
+    import firebase_admin
+    from firebase_admin import credentials, firestore
+
+    try:
+        if not firebase_admin._apps:
+            cred = credentials.Certificate("smartserve-multirestaurant-firebase-adminsdk-fbsvc-1ed7850c3f.json")
+            firebase_admin.initialize_app(cred)
+        db = firestore.client()
+        # تجربة كتابة/قراءة سريعة
+        test_ref = db.collection("connection_test")
+        test_ref.add({"ping": "pong"})
+        st.success("✅ الاتصال بفايربيز Firestore ناجح!")
+        return db
+    except Exception as e:
+        st.error("❌ فشل الاتصال بفايربيز Firestore. يرجى التأكد من إعدادات الخدمة (credentials) وصلاحيات الحساب وخدمة الإنترنت.")
+        st.exception(e)
+        st.stop()
+
+# نادِ الدالة في أعلى الكود
+db = check_firestore_connection()
+
+import streamlit as st
 from huggingface_hub import InferenceClient
 from audio_recorder_streamlit import audio_recorder
 import speech_recognition as sr
