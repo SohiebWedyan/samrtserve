@@ -4,7 +4,7 @@ from firebase_admin import credentials, firestore
 
 # تهيئة Firebase Admin مرة واحدة فقط
 if not firebase_admin._apps:
-    cred = credentials.Certificate("smartserve-multirestaurant-firebase-adminsdk-fbsvc-1ed7850c3f.json")
+    cred = credentials.Certificate("smartserve-multirestaurant-firebase-adminsdk-fbsvc-481204e01b.json")
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
