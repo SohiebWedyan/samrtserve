@@ -72,33 +72,31 @@ def add_order_to_firebase(cart_items, table_number):
 st.set_page_config(layout="centered", page_title="SmartServe AI")
 st.markdown("""
 <style>
-body, .stApp {
-    background: url('https://wallpapers.com/images/featured/restaurant-background-2ez77umko2vj5w02.jpg') no-repeat center center fixed !important;
-    background-size: cover !important;
+.stApp {
     position: relative;
 }
-.stApp:before {
-    content: '';
+.stApp::before {
+    content: "";
     position: fixed;
-    left: 0; top: 0; width: 100vw; height: 100vh;
-    background: rgba(20,20,20,0.60);
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(20,20,20,0.78); /* تظليل داكن */
     z-index: 0;
 }
-.st-emotion-cache-1v0mbdj, .msg-user, .msg-bot, .cart-box {
-    position: relative;
-    z-index: 1;
-}
-.msg-user, .msg-bot {
-    font-size: 20px !important;
+section.main > div {position: relative; z-index: 2;}
+.msg-user, .msg-bot, .cart-box {
+    background: rgba(24, 24, 24, 0.90) !important;
     color: #fff !important;
+    font-size: 21px !important;
     font-weight: bold !important;
-    text-shadow: 2px 2px 5px #111, 0px 1px 8px #000a;
-    background: rgba(20,20,20,0.57) !important;
+    text-shadow: 2px 2px 7px #000a;
     border-radius: 16px !important;
-    padding: 14px 20px !important;
+    padding: 15px 22px !important;
+    margin-bottom: 7px;
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 
 # لوجو ومقدمة
