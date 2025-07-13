@@ -2,16 +2,13 @@ import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, firestore
 import json
-import time
 
-# تهيئة firebase مرة واحدة فقط
 if not firebase_admin._apps:
     firebase_key = st.secrets["FIREBASE_KEY"]
     cred = credentials.Certificate(json.loads(firebase_key))
     firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-# قائمة المطاعم
 RESTAURANTS = {
     "مطعم النخيل": "restaurant1",
     "مطعم زهرة الربيع": "restaurant2",
@@ -23,17 +20,10 @@ RESTAURANT_ID = RESTAURANTS[restaurant_name]
 st.set_page_config(layout="centered", page_title="لوحة إدارة المطعم")
 st.markdown("<h2 style='color:#F9E27B;text-align:center;'>لوحة الطلبات - SmartServe AI</h2>", unsafe_allow_html=True)
 
-# تحديث تلقائي كل 10 ثواني
-st_autorefresh = st.empty()
-interval = 10  # ثواني
-for i in range(interval, 0, -1):
-    st_autorefresh.info(f"سيتم تحديث الطلبات تلقائياً بعد {i} ثانية ⏳")
-    time.sleep(1)
-    st_autorefresh.empty()
-    if i == 1:
-        st.experimental_rerun()
+# ✅ التحديث التلقائي الصحيح كل 10 ثواني
+st_autorefresh = st.experimental_rerun if "rerun" in st.session_state else st.session_state.setdefault("rerun", True)
+st_autorefresh = st.experimental_autorefresh(interval=10*1000, key="refresh")  # 10 ثواني
 
-# قراءة الطلبات من فايربيز
 def get_orders():
     orders_ref = db.collection("restaurants").document(RESTAURANT_ID).collection("orders")
     docs = orders_ref.order_by("timestamp", direction=firestore.Query.DESCENDING).stream()
