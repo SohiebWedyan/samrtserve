@@ -22,7 +22,7 @@ db = firestore.client()
 RESTAURANT_ID = "restaurant1"  # غيره لو عندك أكثر من مطعم لاحقاً
 
 # إعدادات النموذج
-HF_TOKEN = "ضع_توكن_Huggingface_هنا"
+HF_TOKEN = os.environ.get("HF_TOKEN")
 MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
 client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
 
