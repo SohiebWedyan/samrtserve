@@ -1,7 +1,7 @@
 import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, firestore
-
+import json 
 # تهيئة Firebase Admin مرة واحدة فقط
 if not firebase_admin._apps:
     firebase_key = st.secrets["FIREBASE_KEY"]
