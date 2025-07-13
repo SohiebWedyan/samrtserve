@@ -13,10 +13,9 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 # تحميل credentials مرة واحدة فقط
-if "firebase_app" not in st.session_state:
+if not firebase_admin._apps:
     cred = credentials.Certificate("smartserve-multirestaurant-firebase-adminsdk-fbsvc-1ed7850c3f.json")
     firebase_admin.initialize_app(cred)
-    st.session_state["firebase_app"] = True
 
 db = firestore.client()
 RESTAURANT_ID = "restaurant1"  # غيره لو عندك أكثر من مطعم لاحقاً
@@ -52,12 +51,13 @@ menu = [
 
 # --- دالة رفع الطلب إلى فايربيز ---
 def add_order_to_firebase(cart_items, table_number):
-    doc = {
+    order = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "table_number": table_number,
         "items": cart_items
     }
-    db.collection("restaurants").document(RESTAURANT_ID).collection("orders").add(doc)
+    orders_ref = db.collection("restaurants").document(RESTAURANT_ID).collection("orders")
+    orders_ref.add(order)
 
 # إعدادات الواجهة
 st.set_page_config(layout="centered", page_title="SmartServe AI")
