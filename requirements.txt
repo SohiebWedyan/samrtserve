@@ -11,3 +11,4 @@ huggingface_hub>=0.21.3
 gspread 
 oauth2client
 firebase-admin
+streamlit-autorefresh
