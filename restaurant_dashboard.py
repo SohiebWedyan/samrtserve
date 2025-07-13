@@ -2,14 +2,13 @@ import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-# تهيئة الاتصال مع فايربيز (مرة واحدة فقط)
-if "firebase_app" not in st.session_state:
+# لا تكرر التهيئة إذا كان التطبيق مُهيأ مسبقًا!
+if not firebase_admin._apps:
     cred = credentials.Certificate("smartserve-multirestaurant-firebase-adminsdk-fbsvc-1ed7850c3f.json")
     firebase_admin.initialize_app(cred)
-    st.session_state["firebase_app"] = True
 
 db = firestore.client()
-RESTAURANT_ID = "restaurant1"  # إذا أردت دعم عدة مطاعم اجعل هذا ديناميكي
+RESTAURANT_ID = "restaurant1"  # عدل هنا لو أردت
 
 st.set_page_config(layout="centered", page_title="لوحة إدارة المطعم")
 st.markdown("<h2 style='color:#F9E27B;text-align:center;'>لوحة الطلبات - SmartServe AI</h2>", unsafe_allow_html=True)
