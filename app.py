@@ -56,8 +56,10 @@ def add_order_to_firebase(cart_items, table_number):
         "table_number": table_number,
         "items": cart_items
     }
+    RESTAURANT_ID = "restaurant1"
     orders_ref = db.collection("restaurants").document(RESTAURANT_ID).collection("orders")
     orders_ref.add(order)
+
 
 # إعدادات الواجهة
 st.set_page_config(layout="centered", page_title="SmartServe AI")
